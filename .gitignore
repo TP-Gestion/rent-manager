@@ -1,6 +1,3 @@
-#Config
-.env.properties
-
 #Bdd
 postgres_data
 
