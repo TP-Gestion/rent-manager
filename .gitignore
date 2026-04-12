@@ -7,5 +7,4 @@ build
 .idea
 .gradle
 backend/gradlew.bat
-backend/gradlew
 .env
