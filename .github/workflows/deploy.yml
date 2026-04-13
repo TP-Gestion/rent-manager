@@ -1,0 +1,26 @@
+name: Automatic Deploy
+
+on:
+  push:
+    branches:
+      - cicd-test
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v3
+
+      - name: Desplegar vía SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/rent-manager
+            git pull origin cicd-test
+            docker-compose up -d --build --no-deps backend
+            docker image prune -f
