@@ -11,10 +11,10 @@ jobs:
 
     steps:
       - name: Checkout del código
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Desplegar vía SSH
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
@@ -22,5 +22,5 @@ jobs:
           script: |
             cd /var/www/rent-manager
             git pull origin cicd-test
-            docker-compose up -d --build --no-deps backend
+            docker compose up -d --build --no-deps backend
             docker image prune -f
