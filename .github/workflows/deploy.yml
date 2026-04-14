@@ -3,7 +3,7 @@ name: Automatic Deploy
 on:
   push:
     branches:
-      - cicd-test
+      - develop
 
 jobs:
   deploy:
@@ -21,6 +21,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /var/www/rent-manager
-            git pull origin cicd-test
+            git pull origin develop
             docker compose up -d --build --no-deps backend
             docker image prune -f
