@@ -35,10 +35,7 @@ public class TenantService {
         }
 
         Tenant tenant = new Tenant(
-            request.getFirstName(),
-            request.getLastName(),
-            request.getEmail(),
-            request.getPhone()
+                request.getFirstName(), request.getLastName(), request.getEmail(), request.getPhone()
         );
 
         Tenant saved = tenantRepository.save(tenant);
@@ -50,8 +47,7 @@ public class TenantService {
      */
     @Transactional(readOnly = true)
     public TenantResponse getDetail(Long id) {
-        Tenant tenant = tenantRepository.findById(id)
-            .orElseThrow(() -> new TenantNotFoundException(id));
+        Tenant tenant = tenantRepository.findById(id).orElseThrow(() -> new TenantNotFoundException(id));
         return new TenantResponse(tenant);
     }
 
@@ -60,17 +56,14 @@ public class TenantService {
      */
     @Transactional(readOnly = true)
     public List<TenantResponse> getAll() {
-        return tenantRepository.findAll().stream()
-            .map(TenantResponse::new)
-            .collect(Collectors.toList());
+        return tenantRepository.findAll().stream().map(TenantResponse::new).collect(Collectors.toList());
     }
 
     /**
      * Update tenant
      */
     public TenantResponse update(Long id, TenantRequest request) {
-        Tenant tenant = tenantRepository.findById(id)
-            .orElseThrow(() -> new TenantNotFoundException(id));
+        Tenant tenant = tenantRepository.findById(id).orElseThrow(() -> new TenantNotFoundException(id));
 
         tenant.setFirstName(request.getFirstName());
         tenant.setLastName(request.getLastName());
@@ -85,8 +78,7 @@ public class TenantService {
      * Delete tenant
      */
     public void delete(Long id) {
-        Tenant tenant = tenantRepository.findById(id)
-            .orElseThrow(() -> new TenantNotFoundException(id));
+        Tenant tenant = tenantRepository.findById(id).orElseThrow(() -> new TenantNotFoundException(id));
         tenantRepository.delete(tenant);
     }
 }

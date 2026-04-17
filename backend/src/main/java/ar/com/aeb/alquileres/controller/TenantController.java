@@ -30,9 +30,7 @@ public class TenantController {
     @PostMapping
     public ResponseEntity<?> createTenant(@Valid @RequestBody TenantRequest request) {
         TenantResponse response = tenantService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponse<>(HttpStatus.CREATED.value(), "Tenant created successfully",
-                        response));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(HttpStatus.CREATED.value(), "Tenant created successfully", response));
     }
 
     @GetMapping
@@ -49,11 +47,9 @@ public class TenantController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateTenant(
-            @PathVariable Long id,
-            @Valid @RequestBody TenantRequest request) {
+                                          @PathVariable Long id, @Valid @RequestBody TenantRequest request) {
         TenantResponse response = tenantService.update(id, request);
-        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), "Tenant updated successfully",
-                response));
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), "Tenant updated successfully", response));
     }
 
     @DeleteMapping("/{id}")
@@ -62,4 +58,3 @@ public class TenantController {
         return ResponseEntity.noContent().build();
     }
 }
-

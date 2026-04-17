@@ -22,7 +22,7 @@ public class PingController {
         response.put("message", "Alquileres API is running");
         response.put("timestamp", LocalDateTime.now());
         response.put("version", "1.11");
-        
+
         return ResponseEntity.ok(response);
     }
 

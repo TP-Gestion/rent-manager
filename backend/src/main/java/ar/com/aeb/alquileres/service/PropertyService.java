@@ -23,16 +23,11 @@ public class PropertyService {
      */
     public PropertyResponse create(PropertyRequest request) {
         Property property = new Property(
-            request.getAddress(),
-            request.getCity(),
-            request.getProvince(),
-            request.getBedrooms(),
-            request.getBathrooms(),
-            request.getRentalPrice()
+                request.getAddress(), request.getCity(), request.getProvince(), request.getBedrooms(), request.getBathrooms(), request.getRentalPrice()
         );
         property.setPostalCode(request.getPostalCode());
         property.setDescription(request.getDescription());
-        
+
         Property saved = propertyRepository.save(property);
         return new PropertyResponse(saved);
     }
@@ -41,8 +36,7 @@ public class PropertyService {
      * Get property by ID
      */
     public PropertyResponse getById(Long id) {
-        Property property = propertyRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Property not found with id: " + id));
+        Property property = propertyRepository.findById(id).orElseThrow(() -> new RuntimeException("Property not found with id: " + id));
         return new PropertyResponse(property);
     }
 
@@ -51,9 +45,7 @@ public class PropertyService {
      */
     @Transactional(readOnly = true)
     public List<PropertyResponse> getAll() {
-        return propertyRepository.findAll().stream()
-            .map(PropertyResponse::new)
-            .collect(Collectors.toList());
+        return propertyRepository.findAll().stream().map(PropertyResponse::new).collect(Collectors.toList());
     }
 
     /**
@@ -61,9 +53,7 @@ public class PropertyService {
      */
     @Transactional(readOnly = true)
     public List<PropertyResponse> getByCity(String city) {
-        return propertyRepository.findByCity(city).stream()
-            .map(PropertyResponse::new)
-            .collect(Collectors.toList());
+        return propertyRepository.findByCity(city).stream().map(PropertyResponse::new).collect(Collectors.toList());
     }
 
     /**
@@ -72,9 +62,7 @@ public class PropertyService {
     @Transactional(readOnly = true)
     public List<PropertyResponse> getByStatus(String status) {
         Property.PropertyStatus propertyStatus = Property.PropertyStatus.valueOf(status);
-        return propertyRepository.findByStatus(propertyStatus).stream()
-            .map(PropertyResponse::new)
-            .collect(Collectors.toList());
+        return propertyRepository.findByStatus(propertyStatus).stream().map(PropertyResponse::new).collect(Collectors.toList());
     }
 
     /**
@@ -82,18 +70,15 @@ public class PropertyService {
      */
     @Transactional(readOnly = true)
     public List<PropertyResponse> getAvailable() {
-        return propertyRepository.findByStatusOrderByCreatedAtDesc(Property.PropertyStatus.AVAILABLE).stream()
-            .map(PropertyResponse::new)
-            .collect(Collectors.toList());
+        return propertyRepository.findByStatusOrderByCreatedAtDesc(Property.PropertyStatus.AVAILABLE).stream().map(PropertyResponse::new).collect(Collectors.toList());
     }
 
     /**
      * Update property
      */
     public PropertyResponse update(Long id, PropertyRequest request) {
-        Property property = propertyRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Property not found with id: " + id));
-        
+        Property property = propertyRepository.findById(id).orElseThrow(() -> new RuntimeException("Property not found with id: " + id));
+
         property.setAddress(request.getAddress());
         property.setCity(request.getCity());
         property.setProvince(request.getProvince());
@@ -102,7 +87,7 @@ public class PropertyService {
         property.setBathrooms(request.getBathrooms());
         property.setRentalPrice(request.getRentalPrice());
         property.setDescription(request.getDescription());
-        
+
         Property updated = propertyRepository.save(property);
         return new PropertyResponse(updated);
     }
@@ -111,12 +96,11 @@ public class PropertyService {
      * Update property status
      */
     public PropertyResponse updateStatus(Long id, String status) {
-        Property property = propertyRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Property not found with id: " + id));
-        
+        Property property = propertyRepository.findById(id).orElseThrow(() -> new RuntimeException("Property not found with id: " + id));
+
         Property.PropertyStatus propertyStatus = Property.PropertyStatus.valueOf(status);
         property.setStatus(propertyStatus);
-        
+
         Property updated = propertyRepository.save(property);
         return new PropertyResponse(updated);
     }

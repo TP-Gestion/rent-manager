@@ -33,8 +33,7 @@ public class PropertyRequest {
     public PropertyRequest() {
     }
 
-    public PropertyRequest(String address, String city, String province, Integer bedrooms, 
-                          Integer bathrooms, BigDecimal rentalPrice) {
+    public PropertyRequest(String address, String city, String province, Integer bedrooms, Integer bathrooms, BigDecimal rentalPrice) {
         this.address = address;
         this.city = city;
         this.province = province;
