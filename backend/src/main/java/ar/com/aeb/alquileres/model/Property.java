@@ -38,8 +38,7 @@ public class Property extends BaseEntity {
     public Property() {
     }
 
-    public Property(String address, String city, String province, Integer bedrooms, 
-                   Integer bathrooms, BigDecimal rentalPrice) {
+    public Property(String address, String city, String province, Integer bedrooms, Integer bathrooms, BigDecimal rentalPrice) {
         this.address = address;
         this.city = city;
         this.province = province;
@@ -122,9 +121,6 @@ public class Property extends BaseEntity {
     }
 
     public enum PropertyStatus {
-        AVAILABLE,
-        RENTED,
-        MAINTENANCE,
-        INACTIVE
+        AVAILABLE, RENTED, MAINTENANCE, INACTIVE
     }
 }

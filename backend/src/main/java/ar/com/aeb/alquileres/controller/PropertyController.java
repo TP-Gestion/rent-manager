@@ -78,8 +78,7 @@ public class PropertyController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<PropertyResponse> updateProperty(
-            @PathVariable Long id,
-            @Valid @RequestBody PropertyRequest request) {
+                                                           @PathVariable Long id, @Valid @RequestBody PropertyRequest request) {
         PropertyResponse response = propertyService.update(id, request);
         return ResponseEntity.ok(response);
     }
@@ -89,8 +88,7 @@ public class PropertyController {
      */
     @PatchMapping("/{id}/status")
     public ResponseEntity<PropertyResponse> updatePropertyStatus(
-            @PathVariable Long id,
-            @RequestParam String status) {
+                                                                 @PathVariable Long id, @RequestParam String status) {
         PropertyResponse response = propertyService.updateStatus(id, status);
         return ResponseEntity.ok(response);
     }

@@ -21,8 +21,8 @@ public class PingController {
         response.put("status", "UP");
         response.put("message", "Alquileres API is running");
         response.put("timestamp", LocalDateTime.now());
-        response.put("version", "1.0");
-        
+        response.put("version", "1.11");
+
         return ResponseEntity.ok(response);
     }
 
