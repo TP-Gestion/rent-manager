@@ -1,15 +1,23 @@
 package ar.com.aeb.alquileres.controller;
 
+import ar.com.aeb.alquileres.dto.ApiResponse;
 import ar.com.aeb.alquileres.dto.tenant.TenantRequest;
 import ar.com.aeb.alquileres.dto.tenant.TenantResponse;
 import ar.com.aeb.alquileres.service.TenantService;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/tenants")
@@ -19,50 +27,39 @@ public class TenantController {
     @Autowired
     private TenantService tenantService;
 
-    /**
-     * CREATE - Add a new tenant
-     */
     @PostMapping
-    public ResponseEntity<TenantResponse> createTenant(@Valid @RequestBody TenantRequest request) {
+    public ResponseEntity<?> createTenant(@Valid @RequestBody TenantRequest request) {
         TenantResponse response = tenantService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse<>(HttpStatus.CREATED.value(), "Tenant created successfully",
+                        response));
     }
 
-    /**
-     * READ - Get all tenants
-     */
     @GetMapping
     public ResponseEntity<List<TenantResponse>> getAllTenants() {
         List<TenantResponse> tenants = tenantService.getAll();
         return ResponseEntity.ok(tenants);
     }
 
-    /**
-     * READ - Get tenant detail by ID
-     */
     @GetMapping("/{id}/detail")
-    public ResponseEntity<TenantResponse> getTenantDetail(@PathVariable Long id) {
+    public ResponseEntity<?> getTenantDetail(@PathVariable Long id) {
         TenantResponse tenant = tenantService.getDetail(id);
-        return ResponseEntity.ok(tenant);
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), "Success", tenant));
     }
 
-    /**
-     * UPDATE - Update a tenant
-     */
     @PutMapping("/{id}")
-    public ResponseEntity<TenantResponse> updateTenant(
+    public ResponseEntity<?> updateTenant(
             @PathVariable Long id,
             @Valid @RequestBody TenantRequest request) {
         TenantResponse response = tenantService.update(id, request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), "Tenant updated successfully",
+                response));
     }
 
-    /**
-     * DELETE - Remove a tenant
-     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTenant(@PathVariable Long id) {
+    public ResponseEntity<?> deleteTenant(@PathVariable Long id) {
         tenantService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }
+
