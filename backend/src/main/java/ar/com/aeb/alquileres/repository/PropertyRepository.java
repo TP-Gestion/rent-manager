@@ -18,7 +18,7 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
     List<Property> findByAddressContainingIgnoreCase(String address);
 
     List<Property> findByBedroomsGreaterThanEqualAndBathroomsGreaterThanEqual(
-            Integer bedrooms, Integer bathrooms);
+                                                                              Integer bedrooms, Integer bathrooms);
 
     List<Property> findByStatusOrderByCreatedAtDesc(Property.PropertyStatus status);
 }
