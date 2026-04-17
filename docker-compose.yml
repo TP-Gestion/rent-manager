@@ -40,5 +40,4 @@ services:
       - gradle_cache:/root/.gradle
 
 volumes:
-  postgres_data:
   gradle_cache:
