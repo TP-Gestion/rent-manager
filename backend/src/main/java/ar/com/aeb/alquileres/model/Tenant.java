@@ -12,10 +12,10 @@ public class Tenant extends BaseEntity {
     @Column(nullable = false)
     private String lastName;
 
-    @Column(nullable = false, unique = true)
+    @Column
     private String email;
 
-    @Column(nullable = false, unique = true)
+    @Column
     private String phone;
 
     public Tenant() {

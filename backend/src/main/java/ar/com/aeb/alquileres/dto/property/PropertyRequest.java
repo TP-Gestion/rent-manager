@@ -1,109 +1,75 @@
 package ar.com.aeb.alquileres.dto.property;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 public class PropertyRequest {
 
-    @NotBlank(message = "Address is required")
-    private String address;
+    @NotBlank(message = "El edificio es obligatorio")
+    private String edificio;
 
-    @NotBlank(message = "City is required")
-    private String city;
+    @NotBlank(message = "El piso es obligatorio")
+    private String piso;
 
-    @NotBlank(message = "Province is required")
-    private String province;
+    @NotNull(message = "La superficie es obligatoria")
+    private Double superficie;
 
-    private String postalCode;
+    @NotNull(message = "La cantidad de ambientes es obligatoria")
+    private Integer ambientes;
 
-    @NotNull(message = "Number of bedrooms is required")
-    @Min(value = 1, message = "Must have at least 1 bedroom")
-    private Integer bedrooms;
+    @NotBlank(message = "La dirección es obligatoria")
+    private String direccion;
 
-    @NotNull(message = "Number of bathrooms is required")
-    @Min(value = 1, message = "Must have at least 1 bathroom")
-    private Integer bathrooms;
+    @NotBlank(message = "El tipo de unidad es obligatorio")
+    private String tipoUnidad;
 
-    @NotNull(message = "Rental price is required")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Rental price must be greater than 0")
-    private BigDecimal rentalPrice;
+    private BigDecimal montoAlquiler;
 
-    private String description;
+    private BigDecimal expensas;
+
+    private String nombreInquilino;
+    private String apellidoInquilino;
+    private String correoInquilino;
+    private String telefonoInquilino;
 
     public PropertyRequest() {
     }
 
-    public PropertyRequest(String address, String city, String province, Integer bedrooms, Integer bathrooms, BigDecimal rentalPrice) {
-        this.address = address;
-        this.city = city;
-        this.province = province;
-        this.bedrooms = bedrooms;
-        this.bathrooms = bathrooms;
-        this.rentalPrice = rentalPrice;
-    }
+    public String getEdificio() { return edificio; }
+    public void setEdificio(String edificio) { this.edificio = edificio; }
 
-    // Getters y Setters
-    public String getAddress() {
-        return address;
-    }
+    public String getPiso() { return piso; }
+    public void setPiso(String piso) { this.piso = piso; }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
+    public Double getSuperficie() { return superficie; }
+    public void setSuperficie(Double superficie) { this.superficie = superficie; }
 
-    public String getCity() {
-        return city;
-    }
+    public Integer getAmbientes() { return ambientes; }
+    public void setAmbientes(Integer ambientes) { this.ambientes = ambientes; }
 
-    public void setCity(String city) {
-        this.city = city;
-    }
+    public String getDireccion() { return direccion; }
+    public void setDireccion(String direccion) { this.direccion = direccion; }
 
-    public String getProvince() {
-        return province;
-    }
+    public String getTipoUnidad() { return tipoUnidad; }
+    public void setTipoUnidad(String tipoUnidad) { this.tipoUnidad = tipoUnidad; }
 
-    public void setProvince(String province) {
-        this.province = province;
-    }
+    public BigDecimal getMontoAlquiler() { return montoAlquiler; }
+    public void setMontoAlquiler(BigDecimal montoAlquiler) { this.montoAlquiler = montoAlquiler; }
 
-    public String getPostalCode() {
-        return postalCode;
-    }
+    public BigDecimal getExpensas() { return expensas; }
+    public void setExpensas(BigDecimal expensas) { this.expensas = expensas; }
 
-    public void setPostalCode(String postalCode) {
-        this.postalCode = postalCode;
-    }
+    public String getNombreInquilino() { return nombreInquilino; }
+    public void setNombreInquilino(String nombreInquilino) { this.nombreInquilino = nombreInquilino; }
 
-    public Integer getBedrooms() {
-        return bedrooms;
-    }
+    public String getApellidoInquilino() { return apellidoInquilino; }
+    public void setApellidoInquilino(String apellidoInquilino) { this.apellidoInquilino = apellidoInquilino; }
 
-    public void setBedrooms(Integer bedrooms) {
-        this.bedrooms = bedrooms;
-    }
+    public String getCorreoInquilino() { return correoInquilino; }
+    public void setCorreoInquilino(String correoInquilino) { this.correoInquilino = correoInquilino; }
 
-    public Integer getBathrooms() {
-        return bathrooms;
-    }
-
-    public void setBathrooms(Integer bathrooms) {
-        this.bathrooms = bathrooms;
-    }
-
-    public BigDecimal getRentalPrice() {
-        return rentalPrice;
-    }
-
-    public void setRentalPrice(BigDecimal rentalPrice) {
-        this.rentalPrice = rentalPrice;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public String getTelefonoInquilino() { return telefonoInquilino; }
+    public void setTelefonoInquilino(String telefonoInquilino) { this.telefonoInquilino = telefonoInquilino; }
 }
+

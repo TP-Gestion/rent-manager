@@ -8,4 +8,4 @@ backend/bin
 .idea
 .gradle
 backend/gradlew.bat
-.env
+*.env

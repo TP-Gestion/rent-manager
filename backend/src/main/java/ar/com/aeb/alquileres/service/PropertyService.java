@@ -3,12 +3,16 @@ package ar.com.aeb.alquileres.service;
 import ar.com.aeb.alquileres.dto.property.PropertyRequest;
 import ar.com.aeb.alquileres.dto.property.PropertyResponse;
 import ar.com.aeb.alquileres.model.Property;
+import ar.com.aeb.alquileres.model.Tenant;
 import ar.com.aeb.alquileres.repository.PropertyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,87 +26,72 @@ public class PropertyService {
      * Create a new property
      */
     public PropertyResponse create(PropertyRequest request) {
-        Property property = new Property(
-                request.getAddress(), request.getCity(), request.getProvince(), request.getBedrooms(), request.getBathrooms(), request.getRentalPrice()
-        );
-        property.setPostalCode(request.getPostalCode());
-        property.setDescription(request.getDescription());
+        if (propertyRepository.existsByAddressAndBuildingAndFloor(request.getDireccion(), request.getEdificio(), request.getPiso())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "La propiedad ya existe con esa dirección, edificio y piso");
+        }
 
-        Property saved = propertyRepository.save(property);
-        return new PropertyResponse(saved);
+        Property property = new Property();
+        property.setBuilding(request.getEdificio());
+        property.setFloor(request.getPiso());
+        property.setArea(request.getSuperficie());
+        property.setRooms(request.getAmbientes());
+        property.setAddress(request.getDireccion());
+        property.setUnitType(request.getTipoUnidad());
+        property.setRentalPrice(request.getMontoAlquiler());
+        property.setExpenses(request.getExpensas());
+
+        boolean hasTenantName = request.getNombreInquilino() != null && !request.getNombreInquilino().trim().isEmpty();
+        if (hasTenantName) {
+            if (request.getApellidoInquilino() == null || request.getApellidoInquilino().trim().isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Si se ingresa inquilino, el apellido es obligatorio");
+            }
+            Tenant tenant = new Tenant();
+            tenant.setFirstName(request.getNombreInquilino());
+            tenant.setLastName(request.getApellidoInquilino());
+            tenant.setEmail(request.getCorreoInquilino() != null ? request.getCorreoInquilino() : "");
+            tenant.setPhone(request.getTelefonoInquilino() != null ? request.getTelefonoInquilino() : "");
+            property.setTenant(tenant);
+            property.setOccupancyStatus(Property.OccupancyStatus.OCCUPIED);
+        } else {
+            property.setOccupancyStatus(Property.OccupancyStatus.AVAILABLE);
+        }
+        
+        property.setPaymentStatus(Property.PaymentStatus.PAID);
+
+        return new PropertyResponse(propertyRepository.save(property));
     }
 
     /**
      * Get property by ID
      */
+    @Transactional(readOnly = true)
     public PropertyResponse getById(Long id) {
-        Property property = propertyRepository.findById(id).orElseThrow(() -> new RuntimeException("Property not found with id: " + id));
+        Property property = propertyRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Propiedad no encontrada: " + id));
         return new PropertyResponse(property);
     }
 
     /**
-     * Get all properties
+     * Get properties by filters
      */
     @Transactional(readOnly = true)
-    public List<PropertyResponse> getAll() {
-        return propertyRepository.findAll().stream().map(PropertyResponse::new).collect(Collectors.toList());
-    }
-
-    /**
-     * Get properties by city
-     */
-    @Transactional(readOnly = true)
-    public List<PropertyResponse> getByCity(String city) {
-        return propertyRepository.findByCity(city).stream().map(PropertyResponse::new).collect(Collectors.toList());
-    }
-
-    /**
-     * Get properties by status
-     */
-    @Transactional(readOnly = true)
-    public List<PropertyResponse> getByStatus(String status) {
-        Property.PropertyStatus propertyStatus = Property.PropertyStatus.valueOf(status);
-        return propertyRepository.findByStatus(propertyStatus).stream().map(PropertyResponse::new).collect(Collectors.toList());
-    }
-
-    /**
-     * Get available properties
-     */
-    @Transactional(readOnly = true)
-    public List<PropertyResponse> getAvailable() {
-        return propertyRepository.findByStatusOrderByCreatedAtDesc(Property.PropertyStatus.AVAILABLE).stream().map(PropertyResponse::new).collect(Collectors.toList());
-    }
-
-    /**
-     * Update property
-     */
-    public PropertyResponse update(Long id, PropertyRequest request) {
-        Property property = propertyRepository.findById(id).orElseThrow(() -> new RuntimeException("Property not found with id: " + id));
-
-        property.setAddress(request.getAddress());
-        property.setCity(request.getCity());
-        property.setProvince(request.getProvince());
-        property.setPostalCode(request.getPostalCode());
-        property.setBedrooms(request.getBedrooms());
-        property.setBathrooms(request.getBathrooms());
-        property.setRentalPrice(request.getRentalPrice());
-        property.setDescription(request.getDescription());
-
-        Property updated = propertyRepository.save(property);
-        return new PropertyResponse(updated);
-    }
-
-    /**
-     * Update property status
-     */
-    public PropertyResponse updateStatus(Long id, String status) {
-        Property property = propertyRepository.findById(id).orElseThrow(() -> new RuntimeException("Property not found with id: " + id));
-
-        Property.PropertyStatus propertyStatus = Property.PropertyStatus.valueOf(status);
-        property.setStatus(propertyStatus);
-
-        Property updated = propertyRepository.save(property);
-        return new PropertyResponse(updated);
+    public List<PropertyResponse> getByFilters(String building, String status) {
+        Property.PaymentStatus paymentStatus = null;
+        if (status != null && !status.trim().isEmpty()) {
+            try {
+                if (status.equalsIgnoreCase("PAGADO")) paymentStatus = Property.PaymentStatus.PAID;
+                else if (status.equalsIgnoreCase("PENDIENTE")) paymentStatus = Property.PaymentStatus.PENDING;
+                else if (status.equalsIgnoreCase("VENCIDO")) paymentStatus = Property.PaymentStatus.OVERDUE;
+                else paymentStatus = Property.PaymentStatus.valueOf(status.toUpperCase());
+            } catch (Exception e) {
+                // Ignore invalid status for now, or could throw BAD_REQUEST
+            }
+        }
+        
+        String bFilter = (building != null && !building.trim().isEmpty()) ? building : null;
+        
+        return propertyRepository.findByFilters(bFilter, paymentStatus)
+                .stream().map(PropertyResponse::new).collect(Collectors.toList());
     }
 
     /**
@@ -110,7 +99,7 @@ public class PropertyService {
      */
     public void delete(Long id) {
         if (!propertyRepository.existsById(id)) {
-            throw new RuntimeException("Property not found with id: " + id);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Propiedad no encontrada: " + id);
         }
         propertyRepository.deleteById(id);
     }

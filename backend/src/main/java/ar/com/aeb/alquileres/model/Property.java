@@ -8,119 +8,80 @@ import java.math.BigDecimal;
 public class Property extends BaseEntity {
 
     @Column(nullable = false)
+    private String building;
+
+    @Column(nullable = false)
+    private String floor;
+
+    @Column(nullable = false)
+    private Double area;
+
+    @Column(nullable = false)
+    private Integer rooms;
+
+    @Column(nullable = false)
     private String address;
 
     @Column(nullable = false)
-    private String city;
+    private String unitType;
 
-    @Column(nullable = false)
-    private String province;
-
-    @Column(name = "POSTAL_CODE")
-    private String postalCode;
-
-    @Column(nullable = false)
-    private Integer bedrooms;
-
-    @Column(nullable = false)
-    private Integer bathrooms;
-
-    @Column(nullable = false)
     private BigDecimal rentalPrice;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
+    private BigDecimal expenses;
 
-    @Column(nullable = false)
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "tenant_id")
+    private Tenant tenant;
+
     @Enumerated(EnumType.STRING)
-    private PropertyStatus status = PropertyStatus.AVAILABLE;
+    @Column(nullable = false)
+    private OccupancyStatus occupancyStatus = OccupancyStatus.AVAILABLE;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PaymentStatus paymentStatus = PaymentStatus.PAID;
 
     public Property() {
     }
 
-    public Property(String address, String city, String province, Integer bedrooms, Integer bathrooms, BigDecimal rentalPrice) {
-        this.address = address;
-        this.city = city;
-        this.province = province;
-        this.bedrooms = bedrooms;
-        this.bathrooms = bathrooms;
-        this.rentalPrice = rentalPrice;
+    public String getBuilding() { return building; }
+    public void setBuilding(String building) { this.building = building; }
+
+    public String getFloor() { return floor; }
+    public void setFloor(String floor) { this.floor = floor; }
+
+    public Double getArea() { return area; }
+    public void setArea(Double area) { this.area = area; }
+
+    public Integer getRooms() { return rooms; }
+    public void setRooms(Integer rooms) { this.rooms = rooms; }
+
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+
+    public String getUnitType() { return unitType; }
+    public void setUnitType(String unitType) { this.unitType = unitType; }
+
+    public BigDecimal getRentalPrice() { return rentalPrice; }
+    public void setRentalPrice(BigDecimal rentalPrice) { this.rentalPrice = rentalPrice; }
+
+    public BigDecimal getExpenses() { return expenses; }
+    public void setExpenses(BigDecimal expenses) { this.expenses = expenses; }
+
+    public Tenant getTenant() { return tenant; }
+    public void setTenant(Tenant tenant) { this.tenant = tenant; }
+
+    public OccupancyStatus getOccupancyStatus() { return occupancyStatus; }
+    public void setOccupancyStatus(OccupancyStatus occupancyStatus) { this.occupancyStatus = occupancyStatus; }
+
+    public PaymentStatus getPaymentStatus() { return paymentStatus; }
+    public void setPaymentStatus(PaymentStatus paymentStatus) { this.paymentStatus = paymentStatus; }
+
+    public enum OccupancyStatus {
+        AVAILABLE, OCCUPIED
     }
 
-    // Getters y Setters
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getProvince() {
-        return province;
-    }
-
-    public void setProvince(String province) {
-        this.province = province;
-    }
-
-    public String getPostalCode() {
-        return postalCode;
-    }
-
-    public void setPostalCode(String postalCode) {
-        this.postalCode = postalCode;
-    }
-
-    public Integer getBedrooms() {
-        return bedrooms;
-    }
-
-    public void setBedrooms(Integer bedrooms) {
-        this.bedrooms = bedrooms;
-    }
-
-    public Integer getBathrooms() {
-        return bathrooms;
-    }
-
-    public void setBathrooms(Integer bathrooms) {
-        this.bathrooms = bathrooms;
-    }
-
-    public BigDecimal getRentalPrice() {
-        return rentalPrice;
-    }
-
-    public void setRentalPrice(BigDecimal rentalPrice) {
-        this.rentalPrice = rentalPrice;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public PropertyStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(PropertyStatus status) {
-        this.status = status;
-    }
-
-    public enum PropertyStatus {
-        AVAILABLE, RENTED, MAINTENANCE, INACTIVE
+    public enum PaymentStatus {
+        PAID, PENDING, OVERDUE
     }
 }

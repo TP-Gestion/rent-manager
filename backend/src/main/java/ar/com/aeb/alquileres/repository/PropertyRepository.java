@@ -2,6 +2,8 @@ package ar.com.aeb.alquileres.repository;
 
 import ar.com.aeb.alquileres.model.Property;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -9,16 +11,10 @@ import java.util.List;
 @Repository
 public interface PropertyRepository extends JpaRepository<Property, Long> {
 
-    List<Property> findByCity(String city);
+    boolean existsByAddressAndBuildingAndFloor(String address, String building, String floor);
 
-    List<Property> findByStatus(Property.PropertyStatus status);
-
-    List<Property> findByCityAndStatus(String city, Property.PropertyStatus status);
-
-    List<Property> findByAddressContainingIgnoreCase(String address);
-
-    List<Property> findByBedroomsGreaterThanEqualAndBathroomsGreaterThanEqual(
-                                                                              Integer bedrooms, Integer bathrooms);
-
-    List<Property> findByStatusOrderByCreatedAtDesc(Property.PropertyStatus status);
+    @Query("SELECT p FROM Property p WHERE " +
+           "(:building IS NULL OR p.building = :building) AND " +
+           "(:paymentStatus IS NULL OR p.paymentStatus = :paymentStatus)")
+    List<Property> findByFilters(@Param("building") String building, @Param("paymentStatus") Property.PaymentStatus paymentStatus);
 }
