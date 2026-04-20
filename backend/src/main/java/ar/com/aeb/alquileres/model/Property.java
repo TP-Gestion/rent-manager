@@ -7,22 +7,22 @@ import java.math.BigDecimal;
 @Table(name = "PROPERTIES")
 public class Property extends BaseEntity {
 
-    @Column(nullable = false)
+    @Column
     private String building;
 
-    @Column(nullable = false)
+    @Column
     private String floor;
 
-    @Column(nullable = false)
+    @Column
     private Double area;
 
-    @Column(nullable = false)
+    @Column
     private Integer rooms;
 
-    @Column(nullable = false)
+    @Column
     private String address;
 
-    @Column(nullable = false)
+    @Column
     private String unitType;
 
     private BigDecimal rentalPrice;
@@ -34,11 +34,11 @@ public class Property extends BaseEntity {
     private Tenant tenant;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column
     private OccupancyStatus occupancyStatus = OccupancyStatus.AVAILABLE;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column
     private PaymentStatus paymentStatus = PaymentStatus.PAID;
 
     public Property() {
