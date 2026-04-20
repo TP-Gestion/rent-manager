@@ -20,6 +20,8 @@ public class PropertyResponse {
     private String tipoUnidad;
     private BigDecimal montoAlquiler;
     private BigDecimal expensas;
+    private String correoInquilino;
+    private String telefonoInquilino;
 
     public PropertyResponse() {
     }
@@ -29,8 +31,12 @@ public class PropertyResponse {
         
         if (property.getTenant() != null) {
             this.nombreInquilino = property.getTenant().getFirstName() + " " + property.getTenant().getLastName();
+            this.correoInquilino = property.getTenant().getEmail();
+            this.telefonoInquilino = property.getTenant().getPhone();
         } else {
             this.nombreInquilino = "Sin Inquilino";
+            this.correoInquilino = null;
+            this.telefonoInquilino = null;
         }
         
         this.edificio = property.getBuilding();
@@ -100,4 +106,10 @@ public class PropertyResponse {
 
     public BigDecimal getExpensas() { return expensas; }
     public void setExpensas(BigDecimal expensas) { this.expensas = expensas; }
+
+    public String getCorreoInquilino() { return correoInquilino; }
+    public void setCorreoInquilino(String correoInquilino) { this.correoInquilino = correoInquilino; }
+
+    public String getTelefonoInquilino() { return telefonoInquilino; }
+    public void setTelefonoInquilino(String telefonoInquilino) { this.telefonoInquilino = telefonoInquilino; }
 }
