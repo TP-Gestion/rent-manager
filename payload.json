@@ -1,0 +1,14 @@
+{
+  "edificio": "TORRE CENTRAL",           
+  "piso": "3B",                          
+  "superficie": 50.5,                    
+  "ambientes": 2,                        
+  "direccion": "Av. Corrientes 1234",    
+  "tipoUnidad": "DEPARTAMENTO",          
+  "montoAlquiler": 150000,              
+  "expensas": 30000,                    
+  "nombreInquilino": "Carlos",          
+  "apellidoInquilino": "García",        
+  "correoInquilino": "crls@mail.com",   
+  "telefonoInquilino": "1155443322"     
+}
