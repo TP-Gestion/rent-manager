@@ -2,8 +2,10 @@ package ar.com.aeb.alquileres.service;
 
 import ar.com.aeb.alquileres.dto.property.PropertyRequest;
 import ar.com.aeb.alquileres.dto.property.PropertyResponse;
+import ar.com.aeb.alquileres.model.Building;
 import ar.com.aeb.alquileres.model.Property;
 import ar.com.aeb.alquileres.model.Tenant;
+import ar.com.aeb.alquileres.repository.BuildingRepository;
 import ar.com.aeb.alquileres.repository.PropertyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,9 @@ public class PropertyService {
 
     @Autowired
     private PropertyRepository propertyRepository;
+
+    @Autowired
+    private BuildingRepository buildingRepository;
 
     @Autowired
     private TenantService tenantService;
@@ -40,14 +45,6 @@ public class PropertyService {
         return propertyRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
-    public List<PropertyResponse> getByFilters(String building, String status) {
-        Property.PaymentStatus paymentStatus = parsePaymentStatus(status);
-        String bFilter = (building != null && !building.trim().isEmpty()) ? building : null;
-
-        return propertyRepository.findByFilters(bFilter, paymentStatus).stream().map(this::toDto).collect(Collectors.toList());
-    }
-
     public void delete(Long id) {
         findById(id);
         propertyRepository.deleteById(id);
@@ -66,37 +63,32 @@ public class PropertyService {
         return new PropertyResponse(property);
     }
 
-    private Property.PaymentStatus parsePaymentStatus(String status) {
+    private Property.OccupancyStatus parseOccupancyStatus(String status) {
         if (status == null || status.trim().isEmpty()) {
-            return null;
+            return Property.OccupancyStatus.AVAILABLE;
         }
         try {
-            if (status.equalsIgnoreCase("PAID")) return Property.PaymentStatus.PAID;
-            else if (status.equalsIgnoreCase("PENDING")) return Property.PaymentStatus.PENDING;
-            else if (status.equalsIgnoreCase("OVERDUE")) return Property.PaymentStatus.OVERDUE;
-            else return Property.PaymentStatus.valueOf(status.toUpperCase());
+            return Property.OccupancyStatus.valueOf(status.toUpperCase());
         } catch (Exception e) {
-            return null;
+            return Property.OccupancyStatus.AVAILABLE;
         }
     }
 
     private void validatePropertyUniqueness(PropertyRequest request) {
-        if (propertyRepository.existsByAddressAndBuildingAndFloor(request.getAddress(), request.getBuilding(), request.getFloor())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Property already exists with that address, building and floor");
-        }
+        // Validation can be extended if needed
     }
 
     private Property fromDto(PropertyRequest request) {
+        Building building = buildingRepository.findById(request.getBuildingId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Building not found"));
+        
         Property property = new Property();
-        property.setBuilding(request.getBuilding());
+        property.setBuilding(building);
         property.setFloor(request.getFloor());
         property.setArea(request.getArea());
         property.setRooms(request.getRooms());
-        property.setAddress(request.getAddress());
         property.setUnitType(request.getUnitType());
-        property.setExpenses(request.getExpenses());
         property.setOccupancyStatus(Property.OccupancyStatus.AVAILABLE);
-        property.setPaymentStatus(Property.PaymentStatus.PAID);
         return property;
     }
 }

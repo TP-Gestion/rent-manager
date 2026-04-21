@@ -28,12 +28,11 @@ public class PropertyController {
     }
 
     /**
-     * READ - Get filtered properties
+     * READ - Get all properties
      */
     @GetMapping
-    public ResponseEntity<List<PropertyResponse>> getProperties(
-                                                                @RequestParam(required = false) String edificio, @RequestParam(required = false) String estadoPago) {
-        List<PropertyResponse> properties = propertyService.getByFilters(edificio, estadoPago);
+    public ResponseEntity<List<PropertyResponse>> getProperties() {
+        List<PropertyResponse> properties = propertyService.getAll();
         return ResponseEntity.ok(properties);
     }
 

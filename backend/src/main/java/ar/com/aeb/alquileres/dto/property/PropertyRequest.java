@@ -2,12 +2,11 @@ package ar.com.aeb.alquileres.dto.property;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.math.BigDecimal;
 
 public class PropertyRequest {
 
-    @NotBlank(message = "Building is required")
-    private String building;
+    @NotNull(message = "Building ID is required")
+    private Long buildingId;
 
     @NotBlank(message = "Floor is required")
     private String floor;
@@ -18,23 +17,18 @@ public class PropertyRequest {
     @NotNull(message = "Number of rooms is required")
     private Integer rooms;
 
-    @NotBlank(message = "Address is required")
-    private String address;
-
     @NotBlank(message = "Unit type is required")
     private String unitType;
-
-    private BigDecimal expenses;
 
     public PropertyRequest() {
     }
 
-    public String getBuilding() {
-        return building;
+    public Long getBuildingId() {
+        return buildingId;
     }
 
-    public void setBuilding(String building) {
-        this.building = building;
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
     }
 
     public String getFloor() {
@@ -61,27 +55,11 @@ public class PropertyRequest {
         this.rooms = rooms;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
     public String getUnitType() {
         return unitType;
     }
 
     public void setUnitType(String unitType) {
         this.unitType = unitType;
-    }
-
-    public BigDecimal getExpenses() {
-        return expenses;
-    }
-
-    public void setExpenses(BigDecimal expenses) {
-        this.expenses = expenses;
     }
 }

@@ -1,14 +1,18 @@
 package ar.com.aeb.alquileres.model;
 
 import jakarta.persistence.*;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "PROPERTIES")
 public class Property extends BaseEntity {
 
-    @Column(nullable = false)
-    private String building;
+    @ManyToOne
+    @JoinColumn(name = "building_id", nullable = false)
+    private Building building;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "tenant_id")
+    private Tenant tenant;
 
     @Column(nullable = false)
     private String floor;
@@ -20,35 +24,20 @@ public class Property extends BaseEntity {
     private Integer rooms;
 
     @Column(nullable = false)
-    private String address;
-
-    @Column(nullable = false)
     private String unitType;
-
-    private BigDecimal rentalPrice;
-
-    private BigDecimal expenses;
-
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "tenant_id")
-    private Tenant tenant;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OccupancyStatus occupancyStatus = OccupancyStatus.AVAILABLE;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private PaymentStatus paymentStatus = PaymentStatus.PAID;
-
     public Property() {
     }
 
-    public String getBuilding() {
+    public Building getBuilding() {
         return building;
     }
 
-    public void setBuilding(String building) {
+    public void setBuilding(Building building) {
         this.building = building;
     }
 
@@ -76,36 +65,12 @@ public class Property extends BaseEntity {
         this.rooms = rooms;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
     public String getUnitType() {
         return unitType;
     }
 
     public void setUnitType(String unitType) {
         this.unitType = unitType;
-    }
-
-    public BigDecimal getRentalPrice() {
-        return rentalPrice;
-    }
-
-    public void setRentalPrice(BigDecimal rentalPrice) {
-        this.rentalPrice = rentalPrice;
-    }
-
-    public BigDecimal getExpenses() {
-        return expenses;
-    }
-
-    public void setExpenses(BigDecimal expenses) {
-        this.expenses = expenses;
     }
 
     public Tenant getTenant() {
@@ -124,19 +89,7 @@ public class Property extends BaseEntity {
         this.occupancyStatus = occupancyStatus;
     }
 
-    public PaymentStatus getPaymentStatus() {
-        return paymentStatus;
-    }
-
-    public void setPaymentStatus(PaymentStatus paymentStatus) {
-        this.paymentStatus = paymentStatus;
-    }
-
     public enum OccupancyStatus {
         AVAILABLE, OCCUPIED
-    }
-
-    public enum PaymentStatus {
-        PAID, PENDING, OVERDUE
     }
 }

@@ -6,27 +6,23 @@ import java.math.BigDecimal;
 public class PropertyResponse {
 
     private Long id;
-    private String building;
+    private Long buildingId;
     private String floor;
-    private String occupancyStatus;
-    private String address;
     private Double area;
     private Integer rooms;
     private String unitType;
-    private BigDecimal expenses;
+    private String occupancyStatus;
 
     public PropertyResponse() {
     }
 
     public PropertyResponse(Property property) {
         this.id = property.getId();
-        this.building = property.getBuilding();
+        this.buildingId = property.getBuilding().getId();
         this.floor = property.getFloor();
-        this.address = property.getAddress();
         this.area = property.getArea();
         this.rooms = property.getRooms();
         this.unitType = property.getUnitType();
-        this.expenses = property.getExpenses();
         this.occupancyStatus = property.getOccupancyStatus() == Property.OccupancyStatus.AVAILABLE ? "AVAILABLE" : "OCCUPIED";
     }
 
@@ -38,12 +34,12 @@ public class PropertyResponse {
         this.id = id;
     }
 
-    public String getBuilding() {
-        return building;
+    public Long getBuildingId() {
+        return buildingId;
     }
 
-    public void setBuilding(String building) {
-        this.building = building;
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
     }
 
     public String getFloor() {
@@ -52,22 +48,6 @@ public class PropertyResponse {
 
     public void setFloor(String floor) {
         this.floor = floor;
-    }
-
-    public String getOccupancyStatus() {
-        return occupancyStatus;
-    }
-
-    public void setOccupancyStatus(String occupancyStatus) {
-        this.occupancyStatus = occupancyStatus;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
     }
 
     public Double getArea() {
@@ -94,11 +74,11 @@ public class PropertyResponse {
         this.unitType = unitType;
     }
 
-    public BigDecimal getExpenses() {
-        return expenses;
+    public String getOccupancyStatus() {
+        return occupancyStatus;
     }
 
-    public void setExpenses(BigDecimal expenses) {
-        this.expenses = expenses;
+    public void setOccupancyStatus(String occupancyStatus) {
+        this.occupancyStatus = occupancyStatus;
     }
 }
