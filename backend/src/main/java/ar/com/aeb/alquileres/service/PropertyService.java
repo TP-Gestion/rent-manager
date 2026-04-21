@@ -2,8 +2,12 @@ package ar.com.aeb.alquileres.service;
 
 import ar.com.aeb.alquileres.dto.property.PropertyRequest;
 import ar.com.aeb.alquileres.dto.property.PropertyResponse;
+import ar.com.aeb.alquileres.exception.DuplicatePropertyException;
+import ar.com.aeb.alquileres.exception.InvalidPropertyException;
+import ar.com.aeb.alquileres.model.Building;
 import ar.com.aeb.alquileres.model.Property;
 import ar.com.aeb.alquileres.model.Tenant;
+import ar.com.aeb.alquileres.repository.BuildingRepository;
 import ar.com.aeb.alquileres.repository.PropertyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,93 +25,100 @@ public class PropertyService {
     @Autowired
     private PropertyRepository propertyRepository;
 
-    /**
-     * Create a new property
-     */
+    @Autowired
+    private BuildingRepository buildingRepository;
+
+    @Autowired
+    private TenantService tenantService;
+
     public PropertyResponse create(PropertyRequest request) {
-        if (propertyRepository.existsByAddressAndBuildingAndFloor(request.getDireccion(), request.getEdificio(), request.getPiso())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "La propiedad ya existe con esa dirección, edificio y piso");
-        }
-
-        Property property = new Property();
-        property.setBuilding(request.getEdificio());
-        property.setFloor(request.getPiso());
-        property.setArea(request.getSuperficie());
-        property.setRooms(request.getAmbientes());
-        property.setAddress(request.getDireccion());
-        property.setUnitType(request.getTipoUnidad());
-        property.setRentalPrice(request.getMontoAlquiler());
-        property.setExpenses(request.getExpensas());
-
-        boolean hasTenantName = request.getNombreInquilino() != null && !request.getNombreInquilino().trim().isEmpty();
-        if (hasTenantName) {
-            if (request.getApellidoInquilino() == null || request.getApellidoInquilino().trim().isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Si se ingresa inquilino, el apellido es obligatorio");
-            }
-            Tenant tenant = new Tenant();
-            tenant.setFirstName(request.getNombreInquilino());
-            tenant.setLastName(request.getApellidoInquilino());
-            tenant.setEmail(request.getCorreoInquilino() != null ? request.getCorreoInquilino() : "");
-            tenant.setPhone(request.getTelefonoInquilino() != null ? request.getTelefonoInquilino() : "");
-            property.setTenant(tenant);
-            property.setOccupancyStatus(Property.OccupancyStatus.OCCUPIED);
-        } else {
-            property.setOccupancyStatus(Property.OccupancyStatus.AVAILABLE);
-        }
-        
-        property.setPaymentStatus(Property.PaymentStatus.PAID);
-
-        return new PropertyResponse(propertyRepository.save(property));
+        validatePropertyUniqueness(request);
+        Property property = fromDto(request);
+        return toDto(propertyRepository.save(property));
     }
 
-    /**
-     * Get property by ID
-     */
     @Transactional(readOnly = true)
     public PropertyResponse getById(Long id) {
-        Property property = propertyRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Propiedad no encontrada: " + id));
-        return new PropertyResponse(property);
+        return toDto(findById(id));
     }
 
-    /**
-     * Get properties by filters
-     */
     @Transactional(readOnly = true)
-    public List<PropertyResponse> getByFilters(String building, String status) {
-        Property.PaymentStatus paymentStatus = null;
-        if (status != null && !status.trim().isEmpty()) {
-            try {
-                if (status.equalsIgnoreCase("PAGADO")) paymentStatus = Property.PaymentStatus.PAID;
-                else if (status.equalsIgnoreCase("PENDIENTE")) paymentStatus = Property.PaymentStatus.PENDING;
-                else if (status.equalsIgnoreCase("VENCIDO")) paymentStatus = Property.PaymentStatus.OVERDUE;
-                else paymentStatus = Property.PaymentStatus.valueOf(status.toUpperCase());
-            } catch (Exception e) {
-                // Ignore invalid status for now, or could throw BAD_REQUEST
-            }
-        }
-        
-        String bFilter = (building != null && !building.trim().isEmpty()) ? building : null;
-        
-        return propertyRepository.findByFilters(bFilter, paymentStatus)
-                .stream().map(PropertyResponse::new).collect(Collectors.toList());
+    public List<PropertyResponse> getAll() {
+        return propertyRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
     }
 
-    /**
-     * Delete property
-     */
     public void delete(Long id) {
-        if (!propertyRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Propiedad no encontrada: " + id);
-        }
+        findById(id);
         propertyRepository.deleteById(id);
     }
 
-    /**
-     * Count total properties
-     */
+    public PropertyResponse update(Long id, PropertyRequest request) {
+        Property property = findById(id);
+        Building building = buildingRepository.findById(request.getBuildingId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Building not found"));
+        
+        // Validar duplicados solo si building o floor cambiaron
+        if (!property.getBuilding().getId().equals(request.getBuildingId()) || 
+            !property.getFloor().equals(request.getFloor())) {
+            
+            if (propertyRepository.findByBuildingAndFloor(building, request.getFloor()).isPresent()) {
+                throw new DuplicatePropertyException("A property already exists in building '" + building.getName() + "' on floor '" + request.getFloor() + "'");
+            }
+        }
+        
+        property.setBuilding(building);
+        property.setFloor(request.getFloor());
+        property.setArea(request.getArea());
+        property.setRooms(request.getRooms());
+        property.setUnitType(request.getUnitType());
+        
+        return toDto(propertyRepository.save(property));
+    }
+
     @Transactional(readOnly = true)
     public long count() {
         return propertyRepository.count();
+    }
+
+    public Property findById(Long id) {
+        return propertyRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Property not found: " + id));
+    }
+
+    public PropertyResponse toDto(Property property) {
+        return new PropertyResponse(property);
+    }
+
+    private Property.OccupancyStatus parseOccupancyStatus(String status) {
+        if (status == null || status.trim().isEmpty()) {
+            return Property.OccupancyStatus.AVAILABLE;
+        }
+        try {
+            return Property.OccupancyStatus.valueOf(status.toUpperCase());
+        } catch (Exception e) {
+            return Property.OccupancyStatus.AVAILABLE;
+        }
+    }
+
+    private void validatePropertyUniqueness(PropertyRequest request) {
+        Building building = buildingRepository.findById(request.getBuildingId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Building not found"));
+        
+        if (propertyRepository.findByBuildingAndFloor(building, request.getFloor()).isPresent()) {
+            throw new DuplicatePropertyException("A property already exists in building '" + building.getName() + "' on floor '" + request.getFloor() + "'");
+        }
+    }
+
+    private Property fromDto(PropertyRequest request) {
+        Building building = buildingRepository.findById(request.getBuildingId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Building not found"));
+        
+        Property property = new Property();
+        property.setBuilding(building);
+        property.setFloor(request.getFloor());
+        property.setArea(request.getArea());
+        property.setRooms(request.getRooms());
+        property.setUnitType(request.getUnitType());
+        property.setOccupancyStatus(Property.OccupancyStatus.AVAILABLE);
+        return property;
     }
 }

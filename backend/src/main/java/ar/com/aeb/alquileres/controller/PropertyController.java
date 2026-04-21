@@ -28,13 +28,11 @@ public class PropertyController {
     }
 
     /**
-     * READ - Get filtered properties
+     * READ - Get all properties
      */
     @GetMapping
-    public ResponseEntity<List<PropertyResponse>> getProperties(
-            @RequestParam(required = false) String edificio,
-            @RequestParam(required = false) String estadoPago) {
-        List<PropertyResponse> properties = propertyService.getByFilters(edificio, estadoPago);
+    public ResponseEntity<List<PropertyResponse>> getProperties() {
+        List<PropertyResponse> properties = propertyService.getAll();
         return ResponseEntity.ok(properties);
     }
 
@@ -45,6 +43,15 @@ public class PropertyController {
     public ResponseEntity<PropertyResponse> getPropertyById(@PathVariable Long id) {
         PropertyResponse property = propertyService.getById(id);
         return ResponseEntity.ok(property);
+    }
+
+    /**
+     * UPDATE - Update a property
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<PropertyResponse> updateProperty(@PathVariable Long id, @Valid @RequestBody PropertyRequest request) {
+        PropertyResponse response = propertyService.update(id, request);
+        return ResponseEntity.ok(response);
     }
 
     /**

@@ -6,110 +6,79 @@ import java.math.BigDecimal;
 public class PropertyResponse {
 
     private Long id;
-    private String nombreInquilino;
-    private String edificio;
-    private String piso;
-    private String estadoOcupacion;
-    private String estadoPago;
-    private String fechaVencimiento;
-    private BigDecimal montoTotal;
-    
-    private String direccion;
-    private Double superficie;
-    private Integer ambientes;
-    private String tipoUnidad;
-    private BigDecimal montoAlquiler;
-    private BigDecimal expensas;
-    private String correoInquilino;
-    private String telefonoInquilino;
+    private Long buildingId;
+    private String floor;
+    private Double area;
+    private Integer rooms;
+    private String unitType;
+    private String occupancyStatus;
 
     public PropertyResponse() {
     }
 
     public PropertyResponse(Property property) {
         this.id = property.getId();
-        
-        if (property.getTenant() != null) {
-            this.nombreInquilino = property.getTenant().getFirstName() + " " + property.getTenant().getLastName();
-            this.correoInquilino = property.getTenant().getEmail();
-            this.telefonoInquilino = property.getTenant().getPhone();
-        } else {
-            this.nombreInquilino = "Sin Inquilino";
-            this.correoInquilino = null;
-            this.telefonoInquilino = null;
-        }
-        
-        this.edificio = property.getBuilding();
-        this.piso = property.getFloor();
-        this.direccion = property.getAddress();
-        this.superficie = property.getArea();
-        this.ambientes = property.getRooms();
-        this.tipoUnidad = property.getUnitType();
-        this.montoAlquiler = property.getRentalPrice();
-        this.expensas = property.getExpenses();
-        
-        this.estadoOcupacion = property.getOccupancyStatus() == Property.OccupancyStatus.AVAILABLE ? "LIBRE" : "OCUPADO";
-        
-        if (property.getPaymentStatus() == Property.PaymentStatus.PAID) {
-            this.estadoPago = "PAGADO";
-        } else if (property.getPaymentStatus() == Property.PaymentStatus.PENDING) {
-            this.estadoPago = "PENDIENTE";
-        } else {
-            this.estadoPago = "VENCIDO";
-        }
-        
-        this.fechaVencimiento = null;
-        
-        BigDecimal alquiler = this.montoAlquiler != null ? this.montoAlquiler : BigDecimal.ZERO;
-        BigDecimal expTotal = this.expensas != null ? this.expensas : BigDecimal.ZERO;
-        this.montoTotal = alquiler.add(expTotal);
+        this.buildingId = property.getBuilding().getId();
+        this.floor = property.getFloor();
+        this.area = property.getArea();
+        this.rooms = property.getRooms();
+        this.unitType = property.getUnitType();
+        this.occupancyStatus = property.getOccupancyStatus() == Property.OccupancyStatus.AVAILABLE ? "AVAILABLE" : "OCCUPIED";
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getNombreInquilino() { return nombreInquilino; }
-    public void setNombreInquilino(String nombreInquilino) { this.nombreInquilino = nombreInquilino; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getEdificio() { return edificio; }
-    public void setEdificio(String edificio) { this.edificio = edificio; }
+    public Long getBuildingId() {
+        return buildingId;
+    }
 
-    public String getPiso() { return piso; }
-    public void setPiso(String piso) { this.piso = piso; }
+    public void setBuildingId(Long buildingId) {
+        this.buildingId = buildingId;
+    }
 
-    public String getEstadoOcupacion() { return estadoOcupacion; }
-    public void setEstadoOcupacion(String estadoOcupacion) { this.estadoOcupacion = estadoOcupacion; }
+    public String getFloor() {
+        return floor;
+    }
 
-    public String getEstadoPago() { return estadoPago; }
-    public void setEstadoPago(String estadoPago) { this.estadoPago = estadoPago; }
+    public void setFloor(String floor) {
+        this.floor = floor;
+    }
 
-    public String getFechaVencimiento() { return fechaVencimiento; }
-    public void setFechaVencimiento(String fechaVencimiento) { this.fechaVencimiento = fechaVencimiento; }
+    public Double getArea() {
+        return area;
+    }
 
-    public BigDecimal getMontoTotal() { return montoTotal; }
-    public void setMontoTotal(BigDecimal montoTotal) { this.montoTotal = montoTotal; }
+    public void setArea(Double area) {
+        this.area = area;
+    }
 
-    public String getDireccion() { return direccion; }
-    public void setDireccion(String direccion) { this.direccion = direccion; }
+    public Integer getRooms() {
+        return rooms;
+    }
 
-    public Double getSuperficie() { return superficie; }
-    public void setSuperficie(Double superficie) { this.superficie = superficie; }
+    public void setRooms(Integer rooms) {
+        this.rooms = rooms;
+    }
 
-    public Integer getAmbientes() { return ambientes; }
-    public void setAmbientes(Integer ambientes) { this.ambientes = ambientes; }
+    public String getUnitType() {
+        return unitType;
+    }
 
-    public String getTipoUnidad() { return tipoUnidad; }
-    public void setTipoUnidad(String tipoUnidad) { this.tipoUnidad = tipoUnidad; }
+    public void setUnitType(String unitType) {
+        this.unitType = unitType;
+    }
 
-    public BigDecimal getMontoAlquiler() { return montoAlquiler; }
-    public void setMontoAlquiler(BigDecimal montoAlquiler) { this.montoAlquiler = montoAlquiler; }
+    public String getOccupancyStatus() {
+        return occupancyStatus;
+    }
 
-    public BigDecimal getExpensas() { return expensas; }
-    public void setExpensas(BigDecimal expensas) { this.expensas = expensas; }
-
-    public String getCorreoInquilino() { return correoInquilino; }
-    public void setCorreoInquilino(String correoInquilino) { this.correoInquilino = correoInquilino; }
-
-    public String getTelefonoInquilino() { return telefonoInquilino; }
-    public void setTelefonoInquilino(String telefonoInquilino) { this.telefonoInquilino = telefonoInquilino; }
+    public void setOccupancyStatus(String occupancyStatus) {
+        this.occupancyStatus = occupancyStatus;
+    }
 }
