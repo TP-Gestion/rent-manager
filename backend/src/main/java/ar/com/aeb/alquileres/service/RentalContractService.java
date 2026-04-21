@@ -5,6 +5,8 @@ import ar.com.aeb.alquileres.dto.rentalcontract.RentalContractResponse;
 import ar.com.aeb.alquileres.exception.PropertyNotFoundException;
 import ar.com.aeb.alquileres.exception.TenantNotFoundException;
 import ar.com.aeb.alquileres.exception.ResourceNotFoundException;
+import ar.com.aeb.alquileres.exception.DuplicateActiveContractException;
+import ar.com.aeb.alquileres.exception.InvalidRentAmountException;
 import ar.com.aeb.alquileres.model.RentalContract;
 import ar.com.aeb.alquileres.model.Tenant;
 import ar.com.aeb.alquileres.model.Property;
@@ -39,6 +41,15 @@ public class RentalContractService {
 
         Property property = propertyRepository.findById(request.getPropertyId())
                 .orElseThrow(() -> new PropertyNotFoundException(request.getPropertyId()));
+
+        // Validar que la renta sea mayor a 0
+        validateRentAmount(request.getMonthlyRent());
+
+        // Validar que el tenant no tenga contratos activos
+        validateNoActiveContractForTenant(tenant.getId());
+
+        // Validar que la propiedad no tenga contratos activos
+        validateNoActiveContractForProperty(property.getId());
 
         RentalContract contract = new RentalContract(
                 tenant,
@@ -131,5 +142,34 @@ public class RentalContractService {
         contract.setStatus(status);
         RentalContract updated = rentalContractRepository.save(contract);
         return new RentalContractResponse(updated);
+    }
+
+    /**
+     * Validate that tenant doesn't have active contracts
+     */
+    private void validateNoActiveContractForTenant(Long tenantId) {
+        long activeCount = rentalContractRepository.countByStatusAndTenantId(RentalContract.ContractStatus.ACTIVE, tenantId);
+        if (activeCount > 0) {
+            throw new DuplicateActiveContractException("Tenant already has an active rental contract");
+        }
+    }
+
+    /**
+     * Validate that property doesn't have active contracts
+     */
+    private void validateNoActiveContractForProperty(Long propertyId) {
+        long activeCount = rentalContractRepository.countByStatusAndPropertyId(RentalContract.ContractStatus.ACTIVE, propertyId);
+        if (activeCount > 0) {
+            throw new DuplicateActiveContractException("Property already has an active rental contract");
+        }
+    }
+
+    /**
+     * Validate that rent amount is greater than 0
+     */
+    private void validateRentAmount(Double monthlyRent) {
+        if (monthlyRent == null || monthlyRent <= 0) {
+            throw new InvalidRentAmountException("Monthly rent must be greater than 0");
+        }
     }
 }

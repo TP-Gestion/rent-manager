@@ -1,6 +1,5 @@
 package ar.com.aeb.alquileres.dto.rentalcontract;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class RentalContractRequest {
@@ -9,13 +8,13 @@ public class RentalContractRequest {
     private Long propertyId;
     private LocalDate startDate;
     private LocalDate endDate;
-    private BigDecimal monthlyRent;
+    private Double monthlyRent;
 
     public RentalContractRequest() {
     }
 
     public RentalContractRequest(Long tenantId, Long propertyId, LocalDate startDate,
-                                  LocalDate endDate, BigDecimal monthlyRent) {
+                                  LocalDate endDate, Double monthlyRent) {
         this.tenantId = tenantId;
         this.propertyId = propertyId;
         this.startDate = startDate;
@@ -56,11 +55,11 @@ public class RentalContractRequest {
         this.endDate = endDate;
     }
 
-    public BigDecimal getMonthlyRent() {
+    public Double getMonthlyRent() {
         return monthlyRent;
     }
 
-    public void setMonthlyRent(BigDecimal monthlyRent) {
+    public void setMonthlyRent(Double monthlyRent) {
         this.monthlyRent = monthlyRent;
     }
 }

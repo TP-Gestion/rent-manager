@@ -3,7 +3,6 @@ package ar.com.aeb.alquileres.dto.rentalcontract;
 import ar.com.aeb.alquileres.dto.tenant.TenantResponse;
 import ar.com.aeb.alquileres.dto.property.PropertyResponse;
 import ar.com.aeb.alquileres.model.RentalContract;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -14,7 +13,7 @@ public class RentalContractResponse {
     private PropertyResponse property;
     private LocalDate startDate;
     private LocalDate endDate;
-    private BigDecimal monthlyRent;
+    private Double monthlyRent;
     private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -75,11 +74,11 @@ public class RentalContractResponse {
         this.endDate = endDate;
     }
 
-    public BigDecimal getMonthlyRent() {
+    public Double getMonthlyRent() {
         return monthlyRent;
     }
 
-    public void setMonthlyRent(BigDecimal monthlyRent) {
+    public void setMonthlyRent(Double monthlyRent) {
         this.monthlyRent = monthlyRent;
     }
 

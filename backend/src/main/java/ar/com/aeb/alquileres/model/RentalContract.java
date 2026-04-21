@@ -1,7 +1,6 @@
 package ar.com.aeb.alquileres.model;
 
 import jakarta.persistence.*;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -23,7 +22,7 @@ public class RentalContract extends BaseEntity {
     private LocalDate endDate;
 
     @Column(nullable = false)
-    private BigDecimal monthlyRent;
+    private Double monthlyRent;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -33,7 +32,7 @@ public class RentalContract extends BaseEntity {
     }
 
     public RentalContract(Tenant tenant, Property property, LocalDate startDate, LocalDate endDate,
-                          BigDecimal monthlyRent) {
+                          Double monthlyRent) {
         this.tenant = tenant;
         this.property = property;
         this.startDate = startDate;
@@ -74,11 +73,11 @@ public class RentalContract extends BaseEntity {
         this.endDate = endDate;
     }
 
-    public BigDecimal getMonthlyRent() {
+    public Double getMonthlyRent() {
         return monthlyRent;
     }
 
-    public void setMonthlyRent(BigDecimal monthlyRent) {
+    public void setMonthlyRent(Double monthlyRent) {
         this.monthlyRent = monthlyRent;
     }
 
