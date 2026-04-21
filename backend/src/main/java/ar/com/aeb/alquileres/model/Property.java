@@ -1,6 +1,7 @@
 package ar.com.aeb.alquileres.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Positive;
 
 @Entity
 @Table(name = "PROPERTIES")
@@ -17,9 +18,11 @@ public class Property extends BaseEntity {
     @Column(nullable = false)
     private String floor;
 
+    @Positive(message = "Area must be greater than 0")
     @Column(nullable = false)
     private Double area;
 
+    @Positive(message = "Number of rooms must be greater than 0")
     @Column(nullable = false)
     private Integer rooms;
 

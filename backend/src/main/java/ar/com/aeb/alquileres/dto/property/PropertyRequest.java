@@ -2,6 +2,7 @@ package ar.com.aeb.alquileres.dto.property;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public class PropertyRequest {
 
@@ -12,9 +13,11 @@ public class PropertyRequest {
     private String floor;
 
     @NotNull(message = "Area is required")
+    @Positive(message = "Area must be greater than 0")
     private Double area;
 
     @NotNull(message = "Number of rooms is required")
+    @Positive(message = "Number of rooms must be greater than 0")
     private Integer rooms;
 
     @NotBlank(message = "Unit type is required")

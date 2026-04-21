@@ -2,6 +2,8 @@ package ar.com.aeb.alquileres.service;
 
 import ar.com.aeb.alquileres.dto.property.PropertyRequest;
 import ar.com.aeb.alquileres.dto.property.PropertyResponse;
+import ar.com.aeb.alquileres.exception.DuplicatePropertyException;
+import ar.com.aeb.alquileres.exception.InvalidPropertyException;
 import ar.com.aeb.alquileres.model.Building;
 import ar.com.aeb.alquileres.model.Property;
 import ar.com.aeb.alquileres.model.Tenant;
@@ -50,6 +52,29 @@ public class PropertyService {
         propertyRepository.deleteById(id);
     }
 
+    public PropertyResponse update(Long id, PropertyRequest request) {
+        Property property = findById(id);
+        Building building = buildingRepository.findById(request.getBuildingId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Building not found"));
+        
+        // Validar duplicados solo si building o floor cambiaron
+        if (!property.getBuilding().getId().equals(request.getBuildingId()) || 
+            !property.getFloor().equals(request.getFloor())) {
+            
+            if (propertyRepository.findByBuildingAndFloor(building, request.getFloor()).isPresent()) {
+                throw new DuplicatePropertyException("A property already exists in building '" + building.getName() + "' on floor '" + request.getFloor() + "'");
+            }
+        }
+        
+        property.setBuilding(building);
+        property.setFloor(request.getFloor());
+        property.setArea(request.getArea());
+        property.setRooms(request.getRooms());
+        property.setUnitType(request.getUnitType());
+        
+        return toDto(propertyRepository.save(property));
+    }
+
     @Transactional(readOnly = true)
     public long count() {
         return propertyRepository.count();
@@ -75,7 +100,12 @@ public class PropertyService {
     }
 
     private void validatePropertyUniqueness(PropertyRequest request) {
-        // Validation can be extended if needed
+        Building building = buildingRepository.findById(request.getBuildingId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Building not found"));
+        
+        if (propertyRepository.findByBuildingAndFloor(building, request.getFloor()).isPresent()) {
+            throw new DuplicatePropertyException("A property already exists in building '" + building.getName() + "' on floor '" + request.getFloor() + "'");
+        }
     }
 
     private Property fromDto(PropertyRequest request) {

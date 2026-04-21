@@ -46,6 +46,15 @@ public class PropertyController {
     }
 
     /**
+     * UPDATE - Update a property
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<PropertyResponse> updateProperty(@PathVariable Long id, @Valid @RequestBody PropertyRequest request) {
+        PropertyResponse response = propertyService.update(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * DELETE - Remove a property
      */
     @DeleteMapping("/{id}")
