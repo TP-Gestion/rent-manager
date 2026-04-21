@@ -1,12 +1,14 @@
 package ar.com.aeb.alquileres.exception;
 
-public class DuplicateActiveContractException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class DuplicateActiveContractException extends CustomException {
 
     public DuplicateActiveContractException(String message) {
-        super(message);
+        super(message, HttpStatus.CONFLICT);
     }
 
     public DuplicateActiveContractException(String message, Throwable cause) {
-        super(message, cause);
+        super(message, HttpStatus.CONFLICT, cause);
     }
 }

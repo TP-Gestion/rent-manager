@@ -59,46 +59,28 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TenantNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleTenantNotFound(TenantNotFoundException ex) {
         Map<String, Object> body = new HashMap<>();
-        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("status", ex.getHttpStatus().value());
         body.put("message", ex.getMessage());
         body.put("timestamp", LocalDateTime.now());
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(body, ex.getHttpStatus());
     }
 
     @ExceptionHandler(PropertyNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handlePropertyNotFound(PropertyNotFoundException ex) {
         Map<String, Object> body = new HashMap<>();
-        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("status", ex.getHttpStatus().value());
         body.put("message", ex.getMessage());
         body.put("timestamp", LocalDateTime.now());
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(body, ex.getHttpStatus());
     }
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleResourceNotFound(ResourceNotFoundException ex) {
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<Map<String, Object>> handleCustomException(CustomException ex) {
         Map<String, Object> body = new HashMap<>();
-        body.put("status", HttpStatus.NOT_FOUND.value());
+        body.put("status", ex.getHttpStatus().value());
         body.put("message", ex.getMessage());
         body.put("timestamp", LocalDateTime.now());
-        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(DuplicateActiveContractException.class)
-    public ResponseEntity<Map<String, Object>> handleDuplicateActiveContract(DuplicateActiveContractException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", HttpStatus.CONFLICT.value());
-        body.put("message", ex.getMessage());
-        body.put("timestamp", LocalDateTime.now());
-        return new ResponseEntity<>(body, HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(InvalidRentAmountException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidRentAmount(InvalidRentAmountException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-        body.put("message", ex.getMessage());
-        body.put("timestamp", LocalDateTime.now());
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(body, ex.getHttpStatus());
     }
 
     @ExceptionHandler(Exception.class)

@@ -1,8 +1,10 @@
 package ar.com.aeb.alquileres.exception;
 
-public class PropertyNotFoundException extends RuntimeException {
+import org.springframework.http.HttpStatus;
+
+public class PropertyNotFoundException extends CustomException {
 
     public PropertyNotFoundException(Long id) {
-        super("Property not found with id: " + id);
+        super("Property not found with id: " + id, HttpStatus.NOT_FOUND);
     }
 }
