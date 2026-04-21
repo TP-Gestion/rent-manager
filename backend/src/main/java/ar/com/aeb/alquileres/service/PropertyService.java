@@ -94,28 +94,9 @@ public class PropertyService {
         property.setRooms(request.getRooms());
         property.setAddress(request.getAddress());
         property.setUnitType(request.getUnitType());
-        property.setRentalPrice(request.getRentalPrice());
         property.setExpenses(request.getExpenses());
-
-        if (hasTenantData(request)) {
-            property.setTenant(fromDtoTenant(request));
-            property.setOccupancyStatus(Property.OccupancyStatus.OCCUPIED);
-        } else {
-            property.setOccupancyStatus(Property.OccupancyStatus.AVAILABLE);
-        }
-
+        property.setOccupancyStatus(Property.OccupancyStatus.AVAILABLE);
         property.setPaymentStatus(Property.PaymentStatus.PAID);
         return property;
-    }
-
-    private boolean hasTenantData(PropertyRequest request) {
-        return request.getFirstName() != null && !request.getFirstName().trim().isEmpty();
-    }
-
-    private Tenant fromDtoTenant(PropertyRequest request) {
-        if (request.getLastName() == null || request.getLastName().trim().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "If tenant is provided, last name is required");
-        }
-        return tenantService.fromDto(request.getFirstName(), request.getLastName(), request.getEmail(), request.getPhone());
     }
 }

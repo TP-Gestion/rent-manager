@@ -24,14 +24,7 @@ public class PropertyRequest {
     @NotBlank(message = "Unit type is required")
     private String unitType;
 
-    private BigDecimal rentalPrice;
-
     private BigDecimal expenses;
-
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String phone;
 
     public PropertyRequest() {
     }
@@ -84,51 +77,11 @@ public class PropertyRequest {
         this.unitType = unitType;
     }
 
-    public BigDecimal getRentalPrice() {
-        return rentalPrice;
-    }
-
-    public void setRentalPrice(BigDecimal rentalPrice) {
-        this.rentalPrice = rentalPrice;
-    }
-
     public BigDecimal getExpenses() {
         return expenses;
     }
 
     public void setExpenses(BigDecimal expenses) {
         this.expenses = expenses;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
     }
 }
