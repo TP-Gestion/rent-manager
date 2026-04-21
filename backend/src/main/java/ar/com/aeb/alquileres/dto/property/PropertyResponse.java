@@ -6,110 +6,190 @@ import java.math.BigDecimal;
 public class PropertyResponse {
 
     private Long id;
-    private String nombreInquilino;
-    private String edificio;
-    private String piso;
-    private String estadoOcupacion;
-    private String estadoPago;
-    private String fechaVencimiento;
-    private BigDecimal montoTotal;
-    
-    private String direccion;
-    private Double superficie;
-    private Integer ambientes;
-    private String tipoUnidad;
-    private BigDecimal montoAlquiler;
-    private BigDecimal expensas;
-    private String correoInquilino;
-    private String telefonoInquilino;
+    private String tenantName;
+    private String building;
+    private String floor;
+    private String occupancyStatus;
+    private String paymentStatus;
+    private String dueDate;
+    private BigDecimal totalAmount;
+
+    private String address;
+    private Double area;
+    private Integer rooms;
+    private String unitType;
+    private BigDecimal rentalPrice;
+    private BigDecimal expenses;
+    private String tenantEmail;
+    private String tenantPhone;
 
     public PropertyResponse() {
     }
 
     public PropertyResponse(Property property) {
         this.id = property.getId();
-        
+
         if (property.getTenant() != null) {
-            this.nombreInquilino = property.getTenant().getFirstName() + " " + property.getTenant().getLastName();
-            this.correoInquilino = property.getTenant().getEmail();
-            this.telefonoInquilino = property.getTenant().getPhone();
+            this.tenantName = property.getTenant().getFirstName() + " " + property.getTenant().getLastName();
+            this.tenantEmail = property.getTenant().getEmail();
+            this.tenantPhone = property.getTenant().getPhone();
         } else {
-            this.nombreInquilino = "Sin Inquilino";
-            this.correoInquilino = null;
-            this.telefonoInquilino = null;
+            this.tenantName = "No Tenant";
+            this.tenantEmail = null;
+            this.tenantPhone = null;
         }
-        
-        this.edificio = property.getBuilding();
-        this.piso = property.getFloor();
-        this.direccion = property.getAddress();
-        this.superficie = property.getArea();
-        this.ambientes = property.getRooms();
-        this.tipoUnidad = property.getUnitType();
-        this.montoAlquiler = property.getRentalPrice();
-        this.expensas = property.getExpenses();
-        
-        this.estadoOcupacion = property.getOccupancyStatus() == Property.OccupancyStatus.AVAILABLE ? "LIBRE" : "OCUPADO";
-        
+
+        this.building = property.getBuilding();
+        this.floor = property.getFloor();
+        this.address = property.getAddress();
+        this.area = property.getArea();
+        this.rooms = property.getRooms();
+        this.unitType = property.getUnitType();
+        this.rentalPrice = property.getRentalPrice();
+        this.expenses = property.getExpenses();
+
+        this.occupancyStatus = property.getOccupancyStatus() == Property.OccupancyStatus.AVAILABLE ? "AVAILABLE" : "OCCUPIED";
+
         if (property.getPaymentStatus() == Property.PaymentStatus.PAID) {
-            this.estadoPago = "PAGADO";
+            this.paymentStatus = "PAID";
         } else if (property.getPaymentStatus() == Property.PaymentStatus.PENDING) {
-            this.estadoPago = "PENDIENTE";
+            this.paymentStatus = "PENDING";
         } else {
-            this.estadoPago = "VENCIDO";
+            this.paymentStatus = "OVERDUE";
         }
-        
-        this.fechaVencimiento = null;
-        
-        BigDecimal alquiler = this.montoAlquiler != null ? this.montoAlquiler : BigDecimal.ZERO;
-        BigDecimal expTotal = this.expensas != null ? this.expensas : BigDecimal.ZERO;
-        this.montoTotal = alquiler.add(expTotal);
+
+        this.dueDate = null;
+
+        BigDecimal rental = this.rentalPrice != null ? this.rentalPrice : BigDecimal.ZERO;
+        BigDecimal expTotal = this.expenses != null ? this.expenses : BigDecimal.ZERO;
+        this.totalAmount = rental.add(expTotal);
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getNombreInquilino() { return nombreInquilino; }
-    public void setNombreInquilino(String nombreInquilino) { this.nombreInquilino = nombreInquilino; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getEdificio() { return edificio; }
-    public void setEdificio(String edificio) { this.edificio = edificio; }
+    public String getTenantName() {
+        return tenantName;
+    }
 
-    public String getPiso() { return piso; }
-    public void setPiso(String piso) { this.piso = piso; }
+    public void setTenantName(String tenantName) {
+        this.tenantName = tenantName;
+    }
 
-    public String getEstadoOcupacion() { return estadoOcupacion; }
-    public void setEstadoOcupacion(String estadoOcupacion) { this.estadoOcupacion = estadoOcupacion; }
+    public String getBuilding() {
+        return building;
+    }
 
-    public String getEstadoPago() { return estadoPago; }
-    public void setEstadoPago(String estadoPago) { this.estadoPago = estadoPago; }
+    public void setBuilding(String building) {
+        this.building = building;
+    }
 
-    public String getFechaVencimiento() { return fechaVencimiento; }
-    public void setFechaVencimiento(String fechaVencimiento) { this.fechaVencimiento = fechaVencimiento; }
+    public String getFloor() {
+        return floor;
+    }
 
-    public BigDecimal getMontoTotal() { return montoTotal; }
-    public void setMontoTotal(BigDecimal montoTotal) { this.montoTotal = montoTotal; }
+    public void setFloor(String floor) {
+        this.floor = floor;
+    }
 
-    public String getDireccion() { return direccion; }
-    public void setDireccion(String direccion) { this.direccion = direccion; }
+    public String getOccupancyStatus() {
+        return occupancyStatus;
+    }
 
-    public Double getSuperficie() { return superficie; }
-    public void setSuperficie(Double superficie) { this.superficie = superficie; }
+    public void setOccupancyStatus(String occupancyStatus) {
+        this.occupancyStatus = occupancyStatus;
+    }
 
-    public Integer getAmbientes() { return ambientes; }
-    public void setAmbientes(Integer ambientes) { this.ambientes = ambientes; }
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
 
-    public String getTipoUnidad() { return tipoUnidad; }
-    public void setTipoUnidad(String tipoUnidad) { this.tipoUnidad = tipoUnidad; }
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
 
-    public BigDecimal getMontoAlquiler() { return montoAlquiler; }
-    public void setMontoAlquiler(BigDecimal montoAlquiler) { this.montoAlquiler = montoAlquiler; }
+    public String getDueDate() {
+        return dueDate;
+    }
 
-    public BigDecimal getExpensas() { return expensas; }
-    public void setExpensas(BigDecimal expensas) { this.expensas = expensas; }
+    public void setDueDate(String dueDate) {
+        this.dueDate = dueDate;
+    }
 
-    public String getCorreoInquilino() { return correoInquilino; }
-    public void setCorreoInquilino(String correoInquilino) { this.correoInquilino = correoInquilino; }
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
+    }
 
-    public String getTelefonoInquilino() { return telefonoInquilino; }
-    public void setTelefonoInquilino(String telefonoInquilino) { this.telefonoInquilino = telefonoInquilino; }
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Double getArea() {
+        return area;
+    }
+
+    public void setArea(Double area) {
+        this.area = area;
+    }
+
+    public Integer getRooms() {
+        return rooms;
+    }
+
+    public void setRooms(Integer rooms) {
+        this.rooms = rooms;
+    }
+
+    public String getUnitType() {
+        return unitType;
+    }
+
+    public void setUnitType(String unitType) {
+        this.unitType = unitType;
+    }
+
+    public BigDecimal getRentalPrice() {
+        return rentalPrice;
+    }
+
+    public void setRentalPrice(BigDecimal rentalPrice) {
+        this.rentalPrice = rentalPrice;
+    }
+
+    public BigDecimal getExpenses() {
+        return expenses;
+    }
+
+    public void setExpenses(BigDecimal expenses) {
+        this.expenses = expenses;
+    }
+
+    public String getTenantEmail() {
+        return tenantEmail;
+    }
+
+    public void setTenantEmail(String tenantEmail) {
+        this.tenantEmail = tenantEmail;
+    }
+
+    public String getTenantPhone() {
+        return tenantPhone;
+    }
+
+    public void setTenantPhone(String tenantPhone) {
+        this.tenantPhone = tenantPhone;
+    }
 }

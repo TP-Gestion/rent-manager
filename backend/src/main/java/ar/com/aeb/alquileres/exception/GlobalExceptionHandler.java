@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.CONFLICT.value());
         body.put("error", "Conflict");
-        
+
         String msg = ex.getMessage() != null ? ex.getMessage().toLowerCase() : "";
         if (msg.contains("duplicate key") || msg.contains("unique constraint")) {
             body.put("message", "El registro ya existe o los datos ingresados (como email, teléfono o dirección) están duplicados e interfieren con otro registro.");
@@ -49,16 +49,16 @@ public class GlobalExceptionHandler {
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.BAD_REQUEST.value());
         body.put("error", "Bad Request");
-        
+
         Map<String, String> errors = new HashMap<>();
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             errors.put(error.getField(), error.getDefaultMessage());
         }
         body.put("message", errors);
-        
+
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
-    
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleAllUncaughtException(Exception ex) {
         Map<String, Object> body = new HashMap<>();

@@ -44,38 +44,93 @@ public class Property extends BaseEntity {
     public Property() {
     }
 
-    public String getBuilding() { return building; }
-    public void setBuilding(String building) { this.building = building; }
+    public String getBuilding() {
+        return building;
+    }
 
-    public String getFloor() { return floor; }
-    public void setFloor(String floor) { this.floor = floor; }
+    public void setBuilding(String building) {
+        this.building = building;
+    }
 
-    public Double getArea() { return area; }
-    public void setArea(Double area) { this.area = area; }
+    public String getFloor() {
+        return floor;
+    }
 
-    public Integer getRooms() { return rooms; }
-    public void setRooms(Integer rooms) { this.rooms = rooms; }
+    public void setFloor(String floor) {
+        this.floor = floor;
+    }
 
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+    public Double getArea() {
+        return area;
+    }
 
-    public String getUnitType() { return unitType; }
-    public void setUnitType(String unitType) { this.unitType = unitType; }
+    public void setArea(Double area) {
+        this.area = area;
+    }
 
-    public BigDecimal getRentalPrice() { return rentalPrice; }
-    public void setRentalPrice(BigDecimal rentalPrice) { this.rentalPrice = rentalPrice; }
+    public Integer getRooms() {
+        return rooms;
+    }
 
-    public BigDecimal getExpenses() { return expenses; }
-    public void setExpenses(BigDecimal expenses) { this.expenses = expenses; }
+    public void setRooms(Integer rooms) {
+        this.rooms = rooms;
+    }
 
-    public Tenant getTenant() { return tenant; }
-    public void setTenant(Tenant tenant) { this.tenant = tenant; }
+    public String getAddress() {
+        return address;
+    }
 
-    public OccupancyStatus getOccupancyStatus() { return occupancyStatus; }
-    public void setOccupancyStatus(OccupancyStatus occupancyStatus) { this.occupancyStatus = occupancyStatus; }
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
-    public PaymentStatus getPaymentStatus() { return paymentStatus; }
-    public void setPaymentStatus(PaymentStatus paymentStatus) { this.paymentStatus = paymentStatus; }
+    public String getUnitType() {
+        return unitType;
+    }
+
+    public void setUnitType(String unitType) {
+        this.unitType = unitType;
+    }
+
+    public BigDecimal getRentalPrice() {
+        return rentalPrice;
+    }
+
+    public void setRentalPrice(BigDecimal rentalPrice) {
+        this.rentalPrice = rentalPrice;
+    }
+
+    public BigDecimal getExpenses() {
+        return expenses;
+    }
+
+    public void setExpenses(BigDecimal expenses) {
+        this.expenses = expenses;
+    }
+
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+    }
+
+    public OccupancyStatus getOccupancyStatus() {
+        return occupancyStatus;
+    }
+
+    public void setOccupancyStatus(OccupancyStatus occupancyStatus) {
+        this.occupancyStatus = occupancyStatus;
+    }
+
+    public PaymentStatus getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
 
     public enum OccupancyStatus {
         AVAILABLE, OCCUPIED

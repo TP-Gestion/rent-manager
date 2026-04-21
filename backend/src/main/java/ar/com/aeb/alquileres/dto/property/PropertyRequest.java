@@ -6,70 +6,129 @@ import java.math.BigDecimal;
 
 public class PropertyRequest {
 
-    @NotBlank(message = "El edificio es obligatorio")
-    private String edificio;
+    @NotBlank(message = "Building is required")
+    private String building;
 
-    @NotBlank(message = "El piso es obligatorio")
-    private String piso;
+    @NotBlank(message = "Floor is required")
+    private String floor;
 
-    @NotNull(message = "La superficie es obligatoria")
-    private Double superficie;
+    @NotNull(message = "Area is required")
+    private Double area;
 
-    @NotNull(message = "La cantidad de ambientes es obligatoria")
-    private Integer ambientes;
+    @NotNull(message = "Number of rooms is required")
+    private Integer rooms;
 
-    @NotBlank(message = "La dirección es obligatoria")
-    private String direccion;
+    @NotBlank(message = "Address is required")
+    private String address;
 
-    @NotBlank(message = "El tipo de unidad es obligatorio")
-    private String tipoUnidad;
+    @NotBlank(message = "Unit type is required")
+    private String unitType;
 
-    private BigDecimal montoAlquiler;
+    private BigDecimal rentalPrice;
 
-    private BigDecimal expensas;
+    private BigDecimal expenses;
 
-    private String nombreInquilino;
-    private String apellidoInquilino;
-    private String correoInquilino;
-    private String telefonoInquilino;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private String phone;
 
     public PropertyRequest() {
     }
 
-    public String getEdificio() { return edificio; }
-    public void setEdificio(String edificio) { this.edificio = edificio; }
+    public String getBuilding() {
+        return building;
+    }
 
-    public String getPiso() { return piso; }
-    public void setPiso(String piso) { this.piso = piso; }
+    public void setBuilding(String building) {
+        this.building = building;
+    }
 
-    public Double getSuperficie() { return superficie; }
-    public void setSuperficie(Double superficie) { this.superficie = superficie; }
+    public String getFloor() {
+        return floor;
+    }
 
-    public Integer getAmbientes() { return ambientes; }
-    public void setAmbientes(Integer ambientes) { this.ambientes = ambientes; }
+    public void setFloor(String floor) {
+        this.floor = floor;
+    }
 
-    public String getDireccion() { return direccion; }
-    public void setDireccion(String direccion) { this.direccion = direccion; }
+    public Double getArea() {
+        return area;
+    }
 
-    public String getTipoUnidad() { return tipoUnidad; }
-    public void setTipoUnidad(String tipoUnidad) { this.tipoUnidad = tipoUnidad; }
+    public void setArea(Double area) {
+        this.area = area;
+    }
 
-    public BigDecimal getMontoAlquiler() { return montoAlquiler; }
-    public void setMontoAlquiler(BigDecimal montoAlquiler) { this.montoAlquiler = montoAlquiler; }
+    public Integer getRooms() {
+        return rooms;
+    }
 
-    public BigDecimal getExpensas() { return expensas; }
-    public void setExpensas(BigDecimal expensas) { this.expensas = expensas; }
+    public void setRooms(Integer rooms) {
+        this.rooms = rooms;
+    }
 
-    public String getNombreInquilino() { return nombreInquilino; }
-    public void setNombreInquilino(String nombreInquilino) { this.nombreInquilino = nombreInquilino; }
+    public String getAddress() {
+        return address;
+    }
 
-    public String getApellidoInquilino() { return apellidoInquilino; }
-    public void setApellidoInquilino(String apellidoInquilino) { this.apellidoInquilino = apellidoInquilino; }
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
-    public String getCorreoInquilino() { return correoInquilino; }
-    public void setCorreoInquilino(String correoInquilino) { this.correoInquilino = correoInquilino; }
+    public String getUnitType() {
+        return unitType;
+    }
 
-    public String getTelefonoInquilino() { return telefonoInquilino; }
-    public void setTelefonoInquilino(String telefonoInquilino) { this.telefonoInquilino = telefonoInquilino; }
+    public void setUnitType(String unitType) {
+        this.unitType = unitType;
+    }
+
+    public BigDecimal getRentalPrice() {
+        return rentalPrice;
+    }
+
+    public void setRentalPrice(BigDecimal rentalPrice) {
+        this.rentalPrice = rentalPrice;
+    }
+
+    public BigDecimal getExpenses() {
+        return expenses;
+    }
+
+    public void setExpenses(BigDecimal expenses) {
+        this.expenses = expenses;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 }
-

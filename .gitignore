@@ -9,3 +9,4 @@ backend/bin
 .gradle
 backend/gradlew.bat
 *.env
+backend/.env.properties

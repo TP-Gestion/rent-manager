@@ -81,4 +81,12 @@ public class TenantService {
         Tenant tenant = tenantRepository.findById(id).orElseThrow(() -> new TenantNotFoundException(id));
         tenantRepository.delete(tenant);
     }
+
+    public Tenant fromDto(String firstName, String lastName, String email, String phone) {
+        return new Tenant(firstName, lastName, email != null ? email : "", phone != null ? phone : "");
+    }
+
+    public Tenant fromDto(TenantRequest request) {
+        return fromDto(request.getFirstName(), request.getLastName(), request.getEmail(), request.getPhone());
+    }
 }

@@ -32,8 +32,7 @@ public class PropertyController {
      */
     @GetMapping
     public ResponseEntity<List<PropertyResponse>> getProperties(
-            @RequestParam(required = false) String edificio,
-            @RequestParam(required = false) String estadoPago) {
+                                                                @RequestParam(required = false) String edificio, @RequestParam(required = false) String estadoPago) {
         List<PropertyResponse> properties = propertyService.getByFilters(edificio, estadoPago);
         return ResponseEntity.ok(properties);
     }
