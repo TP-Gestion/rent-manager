@@ -1,9 +1,10 @@
 package ar.com.aeb.alquileres.config;
 
 import ar.com.aeb.alquileres.dto.ApiResponse;
-import ar.com.aeb.alquileres.exception.DuplicateEmailException;
-import ar.com.aeb.alquileres.exception.DuplicatePhoneException;
-import ar.com.aeb.alquileres.exception.TenantNotFoundException;
+import ar.com.aeb.alquileres.exception.tenant.DuplicateEmailException;
+import ar.com.aeb.alquileres.exception.tenant.DuplicatePhoneException;
+import ar.com.aeb.alquileres.exception.tenant.TenantNotFoundException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

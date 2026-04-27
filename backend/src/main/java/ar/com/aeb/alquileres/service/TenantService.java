@@ -2,9 +2,9 @@ package ar.com.aeb.alquileres.service;
 
 import ar.com.aeb.alquileres.dto.tenant.TenantRequest;
 import ar.com.aeb.alquileres.dto.tenant.TenantResponse;
-import ar.com.aeb.alquileres.exception.DuplicateEmailException;
-import ar.com.aeb.alquileres.exception.DuplicatePhoneException;
-import ar.com.aeb.alquileres.exception.TenantNotFoundException;
+import ar.com.aeb.alquileres.exception.tenant.DuplicateEmailException;
+import ar.com.aeb.alquileres.exception.tenant.DuplicatePhoneException;
+import ar.com.aeb.alquileres.exception.tenant.TenantNotFoundException;
 import ar.com.aeb.alquileres.model.Tenant;
 import ar.com.aeb.alquileres.repository.TenantRepository;
 import java.util.List;

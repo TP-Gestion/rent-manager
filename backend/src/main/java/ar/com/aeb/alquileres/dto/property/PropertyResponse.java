@@ -1,7 +1,6 @@
 package ar.com.aeb.alquileres.dto.property;
 
 import ar.com.aeb.alquileres.model.Property;
-import java.math.BigDecimal;
 
 public class PropertyResponse {
 

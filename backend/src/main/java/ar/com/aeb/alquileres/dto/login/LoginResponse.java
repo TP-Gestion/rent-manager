@@ -1,4 +1,4 @@
-package ar.com.aeb.alquileres.dto.auth;
+package ar.com.aeb.alquileres.dto.login;
 
 import ar.com.aeb.alquileres.model.User;
 
@@ -12,7 +12,6 @@ public class LoginResponse {
         this.id = user.getId();
         this.name = user.getName();
         this.email = user.getEmail();
-        // Generamos un "token" falso para simular el flujo
         this.dummyToken = "dummy-token-for-user-" + user.getId();
     }
 

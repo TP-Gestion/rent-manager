@@ -3,6 +3,9 @@ package ar.com.aeb.alquileres.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Positive;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "PROPERTIES")
 public class Property extends BaseEntity {
@@ -32,6 +35,9 @@ public class Property extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private OccupancyStatus occupancyStatus = OccupancyStatus.AVAILABLE;
+
+    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PropertyExpense> propertyExpenses = new ArrayList<>();
 
     public Property() {
     }
@@ -90,6 +96,14 @@ public class Property extends BaseEntity {
 
     public void setOccupancyStatus(OccupancyStatus occupancyStatus) {
         this.occupancyStatus = occupancyStatus;
+    }
+
+    public List<PropertyExpense> getPropertyExpenses() {
+        return propertyExpenses;
+    }
+
+    public void setPropertyExpenses(List<PropertyExpense> propertyExpenses) {
+        this.propertyExpenses = propertyExpenses;
     }
 
     public enum OccupancyStatus {

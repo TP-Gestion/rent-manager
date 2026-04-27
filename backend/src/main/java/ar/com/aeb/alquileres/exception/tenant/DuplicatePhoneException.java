@@ -1,4 +1,4 @@
-package ar.com.aeb.alquileres.exception;
+package ar.com.aeb.alquileres.exception.tenant;
 
 public class DuplicatePhoneException extends RuntimeException {
 

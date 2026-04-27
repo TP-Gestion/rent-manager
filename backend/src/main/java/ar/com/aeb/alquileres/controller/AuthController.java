@@ -1,8 +1,8 @@
 package ar.com.aeb.alquileres.controller;
 
-import ar.com.aeb.alquileres.dto.auth.LoginRequest;
-import ar.com.aeb.alquileres.dto.auth.LoginResponse;
-import ar.com.aeb.alquileres.dto.auth.RegisterRequest;
+import ar.com.aeb.alquileres.dto.login.LoginRequest;
+import ar.com.aeb.alquileres.dto.login.LoginResponse;
+import ar.com.aeb.alquileres.dto.login.RegisterRequest;
 import ar.com.aeb.alquileres.service.AuthService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

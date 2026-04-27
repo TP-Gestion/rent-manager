@@ -2,6 +2,8 @@ package ar.com.aeb.alquileres.controller;
 
 import ar.com.aeb.alquileres.dto.building.BuildingRequest;
 import ar.com.aeb.alquileres.dto.building.BuildingResponse;
+import ar.com.aeb.alquileres.dto.expense.ExpenseRequest;
+import ar.com.aeb.alquileres.dto.expense.ExpenseResponse;
 import ar.com.aeb.alquileres.service.BuildingService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ar.com.aeb.alquileres.service.ExpenseService;
 
 @RestController
 @RequestMapping("/api/v1/buildings")
@@ -16,6 +19,9 @@ public class BuildingController {
 
     @Autowired
     private BuildingService buildingService;
+
+    @Autowired
+    private ExpenseService expenseService;
 
     /**
      * CREATE - Add a new building
@@ -69,5 +75,23 @@ public class BuildingController {
     public ResponseEntity<Long> countBuildings() {
         long count = buildingService.count();
         return ResponseEntity.ok(count);
+    }
+
+    /**
+     * READ - Get expenses for a building
+     */
+    @GetMapping("/{buildingId}/expenses")
+    public ResponseEntity<List<ExpenseResponse>> getBuildingExpenses(@PathVariable Long buildingId) {
+        List<ExpenseResponse> response = expenseService.getExpenses(null, buildingId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * CREATE - Add a new expense to a building
+     */
+    @PostMapping("/{buildingId}/expenses")
+    public ResponseEntity<List<ExpenseResponse>> createBuildingExpense(@PathVariable Long buildingId, @Valid @RequestBody ExpenseRequest request) {
+        List<ExpenseResponse> response = expenseService.createBuildingExpense(buildingId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

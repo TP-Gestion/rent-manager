@@ -21,7 +21,7 @@ public class User extends BaseEntity {
 
     @NotBlank
     @Column(nullable = false)
-    private String password; // En un sistema real, esto DEBE estar encriptado.
+    private String password;
 
     public User() {
     }

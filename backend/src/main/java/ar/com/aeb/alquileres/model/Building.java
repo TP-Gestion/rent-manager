@@ -17,6 +17,9 @@ public class Building extends BaseEntity {
     @OneToMany(mappedBy = "building", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Property> properties = new ArrayList<>();
 
+    @OneToMany(mappedBy = "building", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Expense> expenses = new ArrayList<>();
+
     public Building() {
     }
 
@@ -47,5 +50,13 @@ public class Building extends BaseEntity {
 
     public void setProperties(List<Property> properties) {
         this.properties = properties;
+    }
+
+    public List<Expense> getExpenses() {
+        return expenses;
+    }
+
+    public void setExpenses(List<Expense> expenses) {
+        this.expenses = expenses;
     }
 }

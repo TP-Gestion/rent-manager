@@ -1,6 +1,8 @@
-package ar.com.aeb.alquileres.exception;
+package ar.com.aeb.alquileres.exception.rentalContract;
 
 import org.springframework.http.HttpStatus;
+
+import ar.com.aeb.alquileres.exception.CustomException;
 
 public class DuplicateActiveContractException extends CustomException {
 

@@ -1,54 +1,43 @@
 package ar.com.aeb.alquileres.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "RENTAL_CONTRACTS")
 public class RentalContract extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "tenant_id", nullable = false)
-    private Tenant tenant;
-
-    @ManyToOne(fetch = FetchType.EAGER)
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "property_id", nullable = false)
     private Property property;
 
+    @NotNull
+    @Positive(message = "The amount must be greater than 0")
     @Column(nullable = false)
-    private LocalDate startDate;
+    private BigDecimal amount;
 
     @Column(nullable = false)
-    private LocalDate endDate;
+    private LocalDate dueDate;
 
-    @Column(nullable = false)
-    private Double monthlyRent;
-
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ContractStatus status = ContractStatus.ACTIVE;
+    private RentalContractStatus status = RentalContractStatus.PENDING;
 
     public RentalContract() {
     }
 
-    public RentalContract(Tenant tenant, Property property, LocalDate startDate, LocalDate endDate,
-                          Double monthlyRent) {
-        this.tenant = tenant;
+    public RentalContract(Property property, BigDecimal amount, LocalDate dueDate) {
         this.property = property;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.monthlyRent = monthlyRent;
+        this.amount = amount;
+        this.dueDate = dueDate;
     }
 
     // Getters and Setters
-    public Tenant getTenant() {
-        return tenant;
-    }
-
-    public void setTenant(Tenant tenant) {
-        this.tenant = tenant;
-    }
-
     public Property getProperty() {
         return property;
     }
@@ -57,39 +46,31 @@ public class RentalContract extends BaseEntity {
         this.property = property;
     }
 
-    public LocalDate getStartDate() {
-        return startDate;
+    public BigDecimal getAmount() {
+        return amount;
     }
 
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
     }
 
-    public LocalDate getEndDate() {
-        return endDate;
+    public LocalDate getDueDate() {
+        return dueDate;
     }
 
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
     }
 
-    public Double getMonthlyRent() {
-        return monthlyRent;
-    }
-
-    public void setMonthlyRent(Double monthlyRent) {
-        this.monthlyRent = monthlyRent;
-    }
-
-    public ContractStatus getStatus() {
+    public RentalContractStatus getStatus() {
         return status;
     }
 
-    public void setStatus(ContractStatus status) {
+    public void setStatus(RentalContractStatus status) {
         this.status = status;
     }
 
-    public enum ContractStatus {
-        ACTIVE, EXPIRED, TERMINATED, PENDING
+    public enum RentalContractStatus {
+        PENDING, PAID, OVERDUE
     }
 }
