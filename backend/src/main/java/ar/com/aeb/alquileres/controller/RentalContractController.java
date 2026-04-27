@@ -20,11 +20,11 @@ public class RentalContractController {
     private RentalContractService rentalContractService;
 
     /**
-     * Create a new rental contract
+     * Create a new rental contract for a property
      */
-    @PostMapping
-    public ResponseEntity<?> createContract(@Valid @RequestBody RentalContractRequest request) {
-        RentalContractResponse response = rentalContractService.create(request);
+    @PostMapping("/{propertyId}")
+    public ResponseEntity<?> createContract(@PathVariable Long propertyId, @Valid @RequestBody RentalContractRequest request) {
+        RentalContractResponse response = rentalContractService.create(propertyId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(HttpStatus.CREATED.value(), "Rental contract created successfully", response));
     }
 
@@ -44,15 +44,6 @@ public class RentalContractController {
     public ResponseEntity<?> getContractDetail(@PathVariable Long id) {
         RentalContractResponse contract = rentalContractService.getDetail(id);
         return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), "Success", contract));
-    }
-
-    /**
-     * Get contracts by tenant ID
-     */
-    @GetMapping("/tenant/{tenantId}")
-    public ResponseEntity<List<RentalContractResponse>> getContractsByTenant(@PathVariable Long tenantId) {
-        List<RentalContractResponse> contracts = rentalContractService.getByTenant(tenantId);
-        return ResponseEntity.ok(contracts);
     }
 
     /**
@@ -77,7 +68,7 @@ public class RentalContractController {
      * Update contract status
      */
     @PatchMapping("/{id}/status")
-    public ResponseEntity<?> updateContractStatus(@PathVariable Long id, @RequestParam RentalContract.ContractStatus status) {
+    public ResponseEntity<?> updateContractStatus(@PathVariable Long id, @RequestParam RentalContract.RentalContractStatus status) {
         RentalContractResponse response = rentalContractService.updateStatus(id, status);
         return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), "Contract status updated successfully", response));
     }

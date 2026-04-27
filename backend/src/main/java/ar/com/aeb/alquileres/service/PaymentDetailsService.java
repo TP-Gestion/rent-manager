@@ -17,7 +17,6 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,25 +38,19 @@ public class PaymentDetailsService {
     private PaymentDetailsResponse buildPaymentDetails(Property property) {
         List<PropertyExpense> pendingExpenses = property.getPropertyExpenses().stream().filter(pe -> pe.getStatus() == PropertyExpense.PropertyExpenseStatus.PENDING).toList();
 
-        List<ExpenseResponse> expenseDetails = pendingExpenses.stream().map(ExpenseResponse::new).collect(Collectors.toList());
+        List<ExpenseResponse> expenseDetails = property.getPropertyExpenses().stream().map(ExpenseResponse::new).collect(Collectors.toList());
 
-        BigDecimal totalExpenses = pendingExpenses.stream().map(PropertyExpense::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalExpenses = property.getPropertyExpenses().stream().map(PropertyExpense::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        BigDecimal rentAmount = rentalContractRepository.findByPropertyIdAndStatus(property.getId(), RentalContract.ContractStatus.ACTIVE).stream().findFirst().map(c -> BigDecimal.valueOf(c.getMonthlyRent())).orElse(BigDecimal.ZERO);
+        // Get active rental contract with its status
+        BigDecimal rentAmount = rentalContractRepository.findByPropertyIdAndStatus(property.getId(), RentalContract.RentalContractStatus.PENDING).stream().findFirst().map(c -> c.getAmount()).orElse(BigDecimal.ZERO);
 
-        Set<PropertyExpense.PropertyExpenseStatus> statuses = property.getPropertyExpenses().stream()
-                .map(PropertyExpense::getStatus).collect(Collectors.toSet());
-        String paymentStatus = "NO PAGADO";
-        if (statuses.contains(PropertyExpense.PropertyExpenseStatus.OVERDUE)) {
-            paymentStatus = "OVERDUE";
-        } else if (statuses.contains(PropertyExpense.PropertyExpenseStatus.PENDING)) {
-            paymentStatus = "PENDING";
-        }
+        String rentStatus = "PENDING";
 
+        // Find next due date from pending expenses
         LocalDate nextDueDate = pendingExpenses.stream().map(pe -> pe.getExpense().getDueDate()).filter(Objects::nonNull).min(Comparator.naturalOrder()).orElse(null);
 
-        PaymentDetailsResponse response = new PaymentDetailsResponse(rentAmount, totalExpenses, expenseDetails);
-        response.setPaymentStatus(paymentStatus);
+        PaymentDetailsResponse response = new PaymentDetailsResponse(rentAmount, rentStatus, totalExpenses, expenseDetails);
         response.setNextDueDate(nextDueDate);
         return response;
     }

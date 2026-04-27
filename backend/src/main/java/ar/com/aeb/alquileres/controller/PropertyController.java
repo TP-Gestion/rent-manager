@@ -5,13 +5,13 @@ import ar.com.aeb.alquileres.dto.property.PropertyResponse;
 import ar.com.aeb.alquileres.dto.expense.ExpenseRequest;
 import ar.com.aeb.alquileres.dto.expense.ExpenseResponse;
 import ar.com.aeb.alquileres.service.PropertyService;
+import ar.com.aeb.alquileres.service.ExpenseService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import ar.com.aeb.alquileres.service.ExpenseService;
 import java.util.List;
 
 @RestController
@@ -86,4 +86,5 @@ public class PropertyController {
         List<ExpenseResponse> response = expenseService.createPropertyExpense(propertyId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
 }

@@ -1,64 +1,35 @@
 package ar.com.aeb.alquileres.dto.rentalcontract;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class RentalContractRequest {
 
-    private Long tenantId;
-    private Long propertyId;
-    private LocalDate startDate;
-    private LocalDate endDate;
-    private Double monthlyRent;
+    private BigDecimal amount;
+    private LocalDate dueDate;
 
     public RentalContractRequest() {
     }
 
-    public RentalContractRequest(Long tenantId, Long propertyId, LocalDate startDate, LocalDate endDate, Double monthlyRent) {
-        this.tenantId = tenantId;
-        this.propertyId = propertyId;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.monthlyRent = monthlyRent;
+    public RentalContractRequest(BigDecimal amount, LocalDate dueDate) {
+        this.amount = amount;
+        this.dueDate = dueDate;
     }
 
     // Getters and Setters
-    public Long getTenantId() {
-        return tenantId;
+    public BigDecimal getAmount() {
+        return amount;
     }
 
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
     }
 
-    public Long getPropertyId() {
-        return propertyId;
+    public LocalDate getDueDate() {
+        return dueDate;
     }
 
-    public void setPropertyId(Long propertyId) {
-        this.propertyId = propertyId;
-    }
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
-
-    public Double getMonthlyRent() {
-        return monthlyRent;
-    }
-
-    public void setMonthlyRent(Double monthlyRent) {
-        this.monthlyRent = monthlyRent;
+    public void setDueDate(LocalDate dueDate) {
+        this.dueDate = dueDate;
     }
 }
