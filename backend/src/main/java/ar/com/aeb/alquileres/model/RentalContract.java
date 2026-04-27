@@ -31,8 +31,7 @@ public class RentalContract extends BaseEntity {
     public RentalContract() {
     }
 
-    public RentalContract(Tenant tenant, Property property, LocalDate startDate, LocalDate endDate,
-                          Double monthlyRent) {
+    public RentalContract(Tenant tenant, Property property, LocalDate startDate, LocalDate endDate, Double monthlyRent) {
         this.tenant = tenant;
         this.property = property;
         this.startDate = startDate;

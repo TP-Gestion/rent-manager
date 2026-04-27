@@ -9,6 +9,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
+import ar.com.aeb.alquileres.exception.building.BuildingNotFoundException;
+import ar.com.aeb.alquileres.exception.expense.ExpenseNotFoundException;
+import ar.com.aeb.alquileres.exception.expense.InvalidExpenseRequestException;
+import ar.com.aeb.alquileres.exception.property.PropertyNotFoundException;
+import ar.com.aeb.alquileres.exception.rentalContract.RentalContractNotFoundException;
+import ar.com.aeb.alquileres.exception.tenant.TenantNotFoundException;
+
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,9 +39,9 @@ public class GlobalExceptionHandler {
 
         String msg = ex.getMessage() != null ? ex.getMessage().toLowerCase() : "";
         if (msg.contains("duplicate key") || msg.contains("unique constraint")) {
-            body.put("message", "El registro ya existe o los datos ingresados (como email, teléfono o dirección) están duplicados e interfieren con otro registro.");
+            body.put("message", "The record already exists or the data entered (such as email, phone, or address) is duplicated and conflicts with another record.");
         } else {
-            body.put("message", "Error de integridad de datos en la base de datos.");
+            body.put("message", "Data integrity error in the database.");
         }
 
         body.put("timestamp", LocalDateTime.now());
@@ -67,6 +74,42 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(PropertyNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handlePropertyNotFound(PropertyNotFoundException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", ex.getHttpStatus().value());
+        body.put("message", ex.getMessage());
+        body.put("timestamp", LocalDateTime.now());
+        return new ResponseEntity<>(body, ex.getHttpStatus());
+    }
+
+    @ExceptionHandler(BuildingNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleBuildingNotFound(BuildingNotFoundException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", ex.getHttpStatus().value());
+        body.put("message", ex.getMessage());
+        body.put("timestamp", LocalDateTime.now());
+        return new ResponseEntity<>(body, ex.getHttpStatus());
+    }
+
+    @ExceptionHandler(InvalidExpenseRequestException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidExpenseRequest(InvalidExpenseRequestException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", ex.getHttpStatus().value());
+        body.put("message", ex.getMessage());
+        body.put("timestamp", LocalDateTime.now());
+        return new ResponseEntity<>(body, ex.getHttpStatus());
+    }
+
+    @ExceptionHandler(ExpenseNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleExpenseNotFound(ExpenseNotFoundException ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", ex.getHttpStatus().value());
+        body.put("message", ex.getMessage());
+        body.put("timestamp", LocalDateTime.now());
+        return new ResponseEntity<>(body, ex.getHttpStatus());
+    }
+
+    @ExceptionHandler(RentalContractNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleRentalContractNotFound(RentalContractNotFoundException ex) {
         Map<String, Object> body = new HashMap<>();
         body.put("status", ex.getHttpStatus().value());
         body.put("message", ex.getMessage());

@@ -13,8 +13,7 @@ public class RentalContractRequest {
     public RentalContractRequest() {
     }
 
-    public RentalContractRequest(Long tenantId, Long propertyId, LocalDate startDate,
-                                  LocalDate endDate, Double monthlyRent) {
+    public RentalContractRequest(Long tenantId, Long propertyId, LocalDate startDate, LocalDate endDate, Double monthlyRent) {
         this.tenantId = tenantId;
         this.propertyId = propertyId;
         this.startDate = startDate;

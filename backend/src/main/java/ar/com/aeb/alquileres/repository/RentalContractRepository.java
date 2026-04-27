@@ -23,4 +23,6 @@ public interface RentalContractRepository extends JpaRepository<RentalContract, 
     long countByStatusAndTenantId(RentalContract.ContractStatus status, Long tenantId);
 
     long countByStatusAndPropertyId(RentalContract.ContractStatus status, Long propertyId);
+
+    List<RentalContract> findByPropertyIdAndStatus(Long propertyId, RentalContract.ContractStatus status);
 }

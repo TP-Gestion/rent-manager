@@ -2,11 +2,11 @@ package ar.com.aeb.alquileres.service;
 
 import ar.com.aeb.alquileres.dto.rentalcontract.RentalContractRequest;
 import ar.com.aeb.alquileres.dto.rentalcontract.RentalContractResponse;
-import ar.com.aeb.alquileres.exception.PropertyNotFoundException;
-import ar.com.aeb.alquileres.exception.TenantNotFoundException;
-import ar.com.aeb.alquileres.exception.ResourceNotFoundException;
-import ar.com.aeb.alquileres.exception.DuplicateActiveContractException;
-import ar.com.aeb.alquileres.exception.InvalidRentAmountException;
+import ar.com.aeb.alquileres.exception.property.PropertyNotFoundException;
+import ar.com.aeb.alquileres.exception.rentalContract.RentalContractNotFoundException;
+import ar.com.aeb.alquileres.exception.tenant.TenantNotFoundException;
+import ar.com.aeb.alquileres.exception.rentalContract.DuplicateActiveContractException;
+import ar.com.aeb.alquileres.exception.rentalContract.InvalidRentAmountException;
 import ar.com.aeb.alquileres.model.RentalContract;
 import ar.com.aeb.alquileres.model.Tenant;
 import ar.com.aeb.alquileres.model.Property;
@@ -36,11 +36,9 @@ public class RentalContractService {
      * Create a new rental contract
      */
     public RentalContractResponse create(RentalContractRequest request) {
-        Tenant tenant = tenantRepository.findById(request.getTenantId())
-                .orElseThrow(() -> new TenantNotFoundException(request.getTenantId()));
+        Tenant tenant = tenantRepository.findById(request.getTenantId()).orElseThrow(() -> new TenantNotFoundException(request.getTenantId()));
 
-        Property property = propertyRepository.findById(request.getPropertyId())
-                .orElseThrow(() -> new PropertyNotFoundException(request.getPropertyId()));
+        Property property = propertyRepository.findById(request.getPropertyId()).orElseThrow(() -> new PropertyNotFoundException(request.getPropertyId()));
 
         // Validar que la renta sea mayor a 0
         validateRentAmount(request.getMonthlyRent());
@@ -52,11 +50,7 @@ public class RentalContractService {
         validateNoActiveContractForProperty(property.getId());
 
         RentalContract contract = new RentalContract(
-                tenant,
-                property,
-                request.getStartDate(),
-                request.getEndDate(),
-                request.getMonthlyRent()
+                tenant, property, request.getStartDate(), request.getEndDate(), request.getMonthlyRent()
         );
 
         RentalContract saved = rentalContractRepository.save(contract);
@@ -68,8 +62,7 @@ public class RentalContractService {
      */
     @Transactional(readOnly = true)
     public RentalContractResponse getDetail(Long id) {
-        RentalContract contract = rentalContractRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Rental contract not found with id: " + id));
+        RentalContract contract = rentalContractRepository.findById(id).orElseThrow(() -> new RentalContractNotFoundException(id));
         return new RentalContractResponse(contract);
     }
 
@@ -78,9 +71,7 @@ public class RentalContractService {
      */
     @Transactional(readOnly = true)
     public List<RentalContractResponse> getAll() {
-        return rentalContractRepository.findAll().stream()
-                .map(RentalContractResponse::new)
-                .collect(Collectors.toList());
+        return rentalContractRepository.findAll().stream().map(RentalContractResponse::new).collect(Collectors.toList());
     }
 
     /**
@@ -88,12 +79,9 @@ public class RentalContractService {
      */
     @Transactional(readOnly = true)
     public List<RentalContractResponse> getByTenant(Long tenantId) {
-        tenantRepository.findById(tenantId)
-                .orElseThrow(() -> new TenantNotFoundException(tenantId));
+        tenantRepository.findById(tenantId).orElseThrow(() -> new TenantNotFoundException(tenantId));
 
-        return rentalContractRepository.findByTenantId(tenantId).stream()
-                .map(RentalContractResponse::new)
-                .collect(Collectors.toList());
+        return rentalContractRepository.findByTenantId(tenantId).stream().map(RentalContractResponse::new).collect(Collectors.toList());
     }
 
     /**
@@ -101,20 +89,16 @@ public class RentalContractService {
      */
     @Transactional(readOnly = true)
     public List<RentalContractResponse> getByProperty(Long propertyId) {
-        propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new PropertyNotFoundException(propertyId));
+        propertyRepository.findById(propertyId).orElseThrow(() -> new PropertyNotFoundException(propertyId));
 
-        return rentalContractRepository.findByPropertyId(propertyId).stream()
-                .map(RentalContractResponse::new)
-                .collect(Collectors.toList());
+        return rentalContractRepository.findByPropertyId(propertyId).stream().map(RentalContractResponse::new).collect(Collectors.toList());
     }
 
     /**
      * Update contract
      */
     public RentalContractResponse update(Long id, RentalContractRequest request) {
-        RentalContract contract = rentalContractRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Rental contract not found with id: " + id));
+        RentalContract contract = rentalContractRepository.findById(id).orElseThrow(() -> new RentalContractNotFoundException(id));
 
         contract.setStartDate(request.getStartDate());
         contract.setEndDate(request.getEndDate());
@@ -128,8 +112,7 @@ public class RentalContractService {
      * Delete contract
      */
     public void delete(Long id) {
-        RentalContract contract = rentalContractRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Rental contract not found with id: " + id));
+        RentalContract contract = rentalContractRepository.findById(id).orElseThrow(() -> new RentalContractNotFoundException(id));
         rentalContractRepository.delete(contract);
     }
 
@@ -137,8 +120,7 @@ public class RentalContractService {
      * Change contract status
      */
     public RentalContractResponse updateStatus(Long id, RentalContract.ContractStatus status) {
-        RentalContract contract = rentalContractRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Rental contract not found with id: " + id));
+        RentalContract contract = rentalContractRepository.findById(id).orElseThrow(() -> new RentalContractNotFoundException(id));
         contract.setStatus(status);
         RentalContract updated = rentalContractRepository.save(contract);
         return new RentalContractResponse(updated);

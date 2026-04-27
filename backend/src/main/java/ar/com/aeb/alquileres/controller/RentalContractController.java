@@ -25,8 +25,7 @@ public class RentalContractController {
     @PostMapping
     public ResponseEntity<?> createContract(@Valid @RequestBody RentalContractRequest request) {
         RentalContractResponse response = rentalContractService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponse<>(HttpStatus.CREATED.value(), "Rental contract created successfully", response));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(HttpStatus.CREATED.value(), "Rental contract created successfully", response));
     }
 
     /**
