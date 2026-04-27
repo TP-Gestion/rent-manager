@@ -6,7 +6,6 @@ import ar.com.aeb.alquileres.dto.rentalcontract.RentalContractResponse;
 import ar.com.aeb.alquileres.model.RentalContract;
 import ar.com.aeb.alquileres.service.RentalContractService;
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,39 +19,12 @@ public class RentalContractController {
     private RentalContractService rentalContractService;
 
     /**
-     * Create a new rental contract for a property
-     */
-    @PostMapping("/{propertyId}")
-    public ResponseEntity<?> createContract(@PathVariable Long propertyId, @Valid @RequestBody RentalContractRequest request) {
-        RentalContractResponse response = rentalContractService.create(propertyId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(HttpStatus.CREATED.value(), "Rental contract created successfully", response));
-    }
-
-    /**
-     * Get all contracts
-     */
-    @GetMapping
-    public ResponseEntity<List<RentalContractResponse>> getAllContracts() {
-        List<RentalContractResponse> contracts = rentalContractService.getAll();
-        return ResponseEntity.ok(contracts);
-    }
-
-    /**
      * Get contract by ID
      */
     @GetMapping("/{id}")
     public ResponseEntity<?> getContractDetail(@PathVariable Long id) {
         RentalContractResponse contract = rentalContractService.getDetail(id);
         return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), "Success", contract));
-    }
-
-    /**
-     * Get contracts by property ID
-     */
-    @GetMapping("/property/{propertyId}")
-    public ResponseEntity<List<RentalContractResponse>> getContractsByProperty(@PathVariable Long propertyId) {
-        List<RentalContractResponse> contracts = rentalContractService.getByProperty(propertyId);
-        return ResponseEntity.ok(contracts);
     }
 
     /**

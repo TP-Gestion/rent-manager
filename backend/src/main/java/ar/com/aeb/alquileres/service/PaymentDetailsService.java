@@ -2,6 +2,7 @@ package ar.com.aeb.alquileres.service;
 
 import ar.com.aeb.alquileres.dto.expense.ExpenseResponse;
 import ar.com.aeb.alquileres.dto.paymentDetails.PaymentDetailsResponse;
+import ar.com.aeb.alquileres.dto.rentalcontract.RentalContractResponse;
 import ar.com.aeb.alquileres.exception.property.PropertyNotFoundException;
 import ar.com.aeb.alquileres.model.Property;
 import ar.com.aeb.alquileres.model.PropertyExpense;
@@ -12,11 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,18 +37,15 @@ public class PaymentDetailsService {
 
         List<ExpenseResponse> expenseDetails = property.getPropertyExpenses().stream().map(ExpenseResponse::new).collect(Collectors.toList());
 
-        BigDecimal totalExpenses = property.getPropertyExpenses().stream().map(PropertyExpense::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        // Get rental contract for this property
+        RentalContractResponse rentalContractResponse = null;
+        List<RentalContract> contracts = rentalContractRepository.findByPropertyId(property.getId());
+        if (!contracts.isEmpty()) {
+            RentalContract contract = contracts.get(0);
+            rentalContractResponse = new RentalContractResponse(contract);
+        }
 
-        // Get active rental contract with its status
-        BigDecimal rentAmount = rentalContractRepository.findByPropertyIdAndStatus(property.getId(), RentalContract.RentalContractStatus.PENDING).stream().findFirst().map(c -> c.getAmount()).orElse(BigDecimal.ZERO);
-
-        String rentStatus = "PENDING";
-
-        // Find next due date from pending expenses
-        LocalDate nextDueDate = pendingExpenses.stream().map(pe -> pe.getExpense().getDueDate()).filter(Objects::nonNull).min(Comparator.naturalOrder()).orElse(null);
-
-        PaymentDetailsResponse response = new PaymentDetailsResponse(rentAmount, rentStatus, totalExpenses, expenseDetails);
-        response.setNextDueDate(nextDueDate);
+        PaymentDetailsResponse response = new PaymentDetailsResponse(rentalContractResponse, expenseDetails);
         return response;
     }
 }

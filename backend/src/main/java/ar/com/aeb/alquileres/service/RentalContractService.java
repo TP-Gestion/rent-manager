@@ -5,6 +5,7 @@ import ar.com.aeb.alquileres.dto.rentalcontract.RentalContractResponse;
 
 import ar.com.aeb.alquileres.exception.property.PropertyNotFoundException;
 import ar.com.aeb.alquileres.exception.rentalContract.RentalContractNotFoundException;
+import ar.com.aeb.alquileres.exception.rentalContract.DuplicateActiveContractException;
 import ar.com.aeb.alquileres.model.RentalContract;
 import ar.com.aeb.alquileres.model.Property;
 import ar.com.aeb.alquileres.repository.RentalContractRepository;
@@ -30,6 +31,12 @@ public class RentalContractService {
      */
     public RentalContractResponse create(Long propertyId, RentalContractRequest request) {
         Property property = propertyRepository.findById(propertyId).orElseThrow(() -> new PropertyNotFoundException(propertyId));
+
+        // Validate that no rental contract already exists for this property
+        List<RentalContract> existingContracts = rentalContractRepository.findByPropertyId(propertyId);
+        if (!existingContracts.isEmpty()) {
+            throw new DuplicateActiveContractException("Property with ID " + propertyId + " already has a rental contract.");
+        }
 
         RentalContract contract = new RentalContract(
                 property, request.getAmount(), request.getDueDate()

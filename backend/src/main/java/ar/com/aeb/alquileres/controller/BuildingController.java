@@ -78,6 +78,15 @@ public class BuildingController {
     }
 
     /**
+     * READ - Get expenses for a building
+     */
+    @GetMapping("/{buildingId}/expenses")
+    public ResponseEntity<List<ExpenseResponse>> getBuildingExpenses(@PathVariable Long buildingId) {
+        List<ExpenseResponse> response = expenseService.getExpenses(null, buildingId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * CREATE - Add a new expense to a building
      */
     @PostMapping("/{buildingId}/expenses")

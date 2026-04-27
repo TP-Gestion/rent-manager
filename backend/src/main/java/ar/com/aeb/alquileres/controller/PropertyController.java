@@ -4,8 +4,11 @@ import ar.com.aeb.alquileres.dto.property.PropertyRequest;
 import ar.com.aeb.alquileres.dto.property.PropertyResponse;
 import ar.com.aeb.alquileres.dto.expense.ExpenseRequest;
 import ar.com.aeb.alquileres.dto.expense.ExpenseResponse;
+import ar.com.aeb.alquileres.dto.rentalcontract.RentalContractRequest;
+import ar.com.aeb.alquileres.dto.rentalcontract.RentalContractResponse;
 import ar.com.aeb.alquileres.service.PropertyService;
 import ar.com.aeb.alquileres.service.ExpenseService;
+import ar.com.aeb.alquileres.service.RentalContractService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,6 +26,9 @@ public class PropertyController {
 
     @Autowired
     private ExpenseService expenseService;
+
+    @Autowired
+    private RentalContractService rentalContractService;
 
     /**
      * CREATE - Add a new property
@@ -79,6 +85,15 @@ public class PropertyController {
     }
 
     /**
+     * READ - Get expenses for a property
+     */
+    @GetMapping("/{propertyId}/expenses")
+    public ResponseEntity<List<ExpenseResponse>> getPropertyExpenses(@PathVariable Long propertyId) {
+        List<ExpenseResponse> response = expenseService.getExpenses(propertyId, null);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * CREATE - Add a new expense to a property
      */
     @PostMapping("/{propertyId}/expenses")
@@ -87,4 +102,21 @@ public class PropertyController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /**
+     * READ - Get rental contracts for a property
+     */
+    @GetMapping("/{propertyId}/rental-contract")
+    public ResponseEntity<List<RentalContractResponse>> getPropertyRentalContracts(@PathVariable Long propertyId) {
+        List<RentalContractResponse> response = rentalContractService.getByProperty(propertyId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * CREATE - Add a new rental contract to a property
+     */
+    @PostMapping("/{propertyId}/rental-contract")
+    public ResponseEntity<RentalContractResponse> createPropertyRentalContract(@PathVariable Long propertyId, @Valid @RequestBody RentalContractRequest request) {
+        RentalContractResponse response = rentalContractService.create(propertyId, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
 }
