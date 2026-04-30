@@ -1,25 +1,24 @@
 package ar.com.aeb.alquileres.service;
 
-import ar.com.aeb.alquileres.dto.tenant.TenantRequest;
 import ar.com.aeb.alquileres.dto.property.PropertyDetailsResponse;
 import ar.com.aeb.alquileres.dto.property.PropertyRequest;
 import ar.com.aeb.alquileres.dto.property.PropertyResponse;
+import ar.com.aeb.alquileres.dto.property.PropertySummaryResponse;
+import ar.com.aeb.alquileres.dto.tenant.TenantRequest;
 import ar.com.aeb.alquileres.exception.building.BuildingNotFoundException;
 import ar.com.aeb.alquileres.exception.property.DuplicatePropertyException;
 import ar.com.aeb.alquileres.exception.property.PropertyNotFoundException;
-import ar.com.aeb.alquileres.model.Building;
-import ar.com.aeb.alquileres.model.Property;
-import ar.com.aeb.alquileres.model.RentalContract;
-import ar.com.aeb.alquileres.model.Tenant;
+import ar.com.aeb.alquileres.model.*;
 import ar.com.aeb.alquileres.repository.BuildingRepository;
 import ar.com.aeb.alquileres.repository.PropertyRepository;
 import ar.com.aeb.alquileres.repository.RentalContractRepository;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -54,6 +53,71 @@ public class PropertyService {
         List<RentalContract> contracts = rentalContractRepository.findByPropertyId(id);
         RentalContract activeContract = contracts.stream().filter(c -> c.getStatus() != RentalContract.RentalContractStatus.PAID).findFirst().orElse(null);
         return new PropertyDetailsResponse(property, activeContract);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PropertySummaryResponse> getSummary() {
+        return propertyRepository.findAll().stream().map(this::buildSummary).collect(Collectors.toList());
+    }
+
+    private PropertySummaryResponse buildSummary(Property property) {
+        PropertySummaryResponse summary = new PropertySummaryResponse();
+        summary.setId(property.getId());
+        summary.setEdificio(property.getBuilding().getName());
+        summary.setPiso(property.getFloor());
+        summary.setTipoUnidad(property.getUnitType());
+        summary.setEstadoOcupacion(property.getOccupancyStatus().name());
+
+        if (property.getTenant() != null) {
+            summary.setInquilino(new PropertySummaryResponse.TenantSummary(property.getTenant().getId(), property.getTenant().getFirstName(), property.getTenant().getLastName()));
+        }
+
+        // Get contracts and expenses to calculate total and status
+        List<RentalContract> contracts = rentalContractRepository.findByPropertyId(property.getId());
+        List<PropertyExpense> expenses = property.getPropertyExpenses();
+
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        LocalDate earliestDueDate = null;
+        boolean hasPending = false;
+        boolean hasOverdue = false;
+
+        // Process Contracts
+        for (RentalContract contract : contracts) {
+            if (contract.getStatus() != RentalContract.RentalContractStatus.PAID) {
+                hasPending = true;
+                totalAmount = totalAmount.add(contract.getAmount());
+                if (contract.getStatus() == RentalContract.RentalContractStatus.OVERDUE) {
+                    hasOverdue = true;
+                }
+                if (earliestDueDate == null || contract.getDueDate().isBefore(earliestDueDate)) {
+                    earliestDueDate = contract.getDueDate();
+                }
+            }
+        }
+
+        // Process Expenses
+        for (PropertyExpense pe : expenses) {
+            if (pe.getStatus() != PropertyExpense.PropertyExpenseStatus.PAID) {
+                hasPending = true;
+                totalAmount = totalAmount.add(pe.getAmount());
+                if (pe.getStatus() == PropertyExpense.PropertyExpenseStatus.OVERDUE) {
+                    hasOverdue = true;
+                }
+            }
+        }
+
+        summary.setMontoTotal(totalAmount);
+        summary.setFechaVencimiento(earliestDueDate);
+
+        if (hasOverdue) {
+            summary.setEstadoPago("OVERDUE");
+        } else if (hasPending) {
+            summary.setEstadoPago("PENDING");
+        } else {
+            summary.setEstadoPago("PAID");
+        }
+
+        return summary;
     }
 
     @Transactional(readOnly = true)
