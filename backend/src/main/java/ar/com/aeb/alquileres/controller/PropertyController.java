@@ -1,7 +1,9 @@
 package ar.com.aeb.alquileres.controller;
 
+import ar.com.aeb.alquileres.dto.property.PropertyDetailsResponse;
 import ar.com.aeb.alquileres.dto.property.PropertyRequest;
 import ar.com.aeb.alquileres.dto.property.PropertyResponse;
+import ar.com.aeb.alquileres.dto.tenant.TenantRequest;
 import ar.com.aeb.alquileres.dto.expense.ExpenseRequest;
 import ar.com.aeb.alquileres.dto.expense.ExpenseResponse;
 import ar.com.aeb.alquileres.dto.rentalcontract.RentalContractRequest;
@@ -55,6 +57,42 @@ public class PropertyController {
     public ResponseEntity<PropertyResponse> getPropertyById(@PathVariable Long id) {
         PropertyResponse property = propertyService.getById(id);
         return ResponseEntity.ok(property);
+    }
+
+    /**
+     * READ - Get property details by ID
+     */
+    @GetMapping("/{id}/details")
+    public ResponseEntity<PropertyDetailsResponse> getPropertyDetails(@PathVariable Long id) {
+        PropertyDetailsResponse details = propertyService.getDetails(id);
+        return ResponseEntity.ok(details);
+    }
+
+    /**
+     * CREATE - Add a new tenant to a property
+     */
+    @PostMapping("/{id}/tenants")
+    public ResponseEntity<PropertyResponse> createPropertyTenant(@PathVariable Long id, @Valid @RequestBody TenantRequest request) {
+        PropertyResponse response = propertyService.createAndAssignTenant(id, request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * UPDATE - Assign a tenant to a property
+     */
+    @PatchMapping("/{id}/tenant/{tenantId}")
+    public ResponseEntity<PropertyResponse> assignTenant(@PathVariable Long id, @PathVariable Long tenantId) {
+        PropertyResponse response = propertyService.assignTenant(id, tenantId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * UPDATE - Remove a tenant from a property
+     */
+    @DeleteMapping("/{id}/tenant")
+    public ResponseEntity<PropertyResponse> removeTenant(@PathVariable Long id) {
+        PropertyResponse response = propertyService.removeTenant(id);
+        return ResponseEntity.ok(response);
     }
 
     /**
