@@ -1,5 +1,12 @@
 package ar.com.aeb.alquileres.exception;
 
+import ar.com.aeb.alquileres.dto.ApiResponse;
+import ar.com.aeb.alquileres.exception.building.BuildingNotFoundException;
+import ar.com.aeb.alquileres.exception.expense.ExpenseNotFoundException;
+import ar.com.aeb.alquileres.exception.expense.InvalidExpenseRequestException;
+import ar.com.aeb.alquileres.exception.property.PropertyNotFoundException;
+import ar.com.aeb.alquileres.exception.rentalContract.RentalContractNotFoundException;
+import ar.com.aeb.alquileres.exception.tenant.TenantNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,14 +16,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
-import ar.com.aeb.alquileres.exception.building.BuildingNotFoundException;
-import ar.com.aeb.alquileres.exception.expense.ExpenseNotFoundException;
-import ar.com.aeb.alquileres.exception.expense.InvalidExpenseRequestException;
-import ar.com.aeb.alquileres.exception.property.PropertyNotFoundException;
-import ar.com.aeb.alquileres.exception.rentalContract.RentalContractNotFoundException;
-import ar.com.aeb.alquileres.exception.tenant.TenantNotFoundException;
-
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,114 +23,69 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<Map<String, Object>> handleResponseStatusException(ResponseStatusException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", ex.getStatusCode().value());
-        body.put("message", ex.getReason());
-        body.put("timestamp", LocalDateTime.now());
-        return new ResponseEntity<>(body, ex.getStatusCode());
+    public ResponseEntity<ApiResponse<Void>> handleResponseStatusException(ResponseStatusException ex) {
+        return ResponseEntity.status(ex.getStatusCode()).body(ApiResponse.error(ex.getStatusCode().value(), ex.getReason()));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", HttpStatus.CONFLICT.value());
-
+    public ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         String msg = ex.getMessage() != null ? ex.getMessage().toLowerCase() : "";
+        String userMsg = "Data integrity error in the database.";
+
         if (msg.contains("duplicate key") || msg.contains("unique constraint")) {
-            body.put("message", "The record already exists or the data entered (such as email, phone, or address) is duplicated and conflicts with another record.");
-        } else {
-            body.put("message", "Data integrity error in the database.");
+            userMsg = "The record already exists or the data entered conflicts with another record.";
         }
 
-        body.put("timestamp", LocalDateTime.now());
-        return new ResponseEntity<>(body, HttpStatus.CONFLICT);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiResponse.error(HttpStatus.CONFLICT.value(), userMsg));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-
+    public ResponseEntity<ApiResponse<Void>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             errors.put(error.getField(), error.getDefaultMessage());
         }
-        body.put("message", errors);
 
-        body.put("timestamp", LocalDateTime.now());
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.error(HttpStatus.BAD_REQUEST.value(), "Validation failed", errors));
     }
 
     @ExceptionHandler(TenantNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleTenantNotFound(TenantNotFoundException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", ex.getHttpStatus().value());
-        body.put("message", ex.getMessage());
-        body.put("timestamp", LocalDateTime.now());
-        return new ResponseEntity<>(body, ex.getHttpStatus());
+    public ResponseEntity<ApiResponse<Void>> handleTenantNotFound(TenantNotFoundException ex) {
+        return ResponseEntity.status(ex.getHttpStatus()).body(ApiResponse.error(ex.getHttpStatus().value(), ex.getMessage()));
     }
 
     @ExceptionHandler(PropertyNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handlePropertyNotFound(PropertyNotFoundException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", ex.getHttpStatus().value());
-        body.put("message", ex.getMessage());
-        body.put("timestamp", LocalDateTime.now());
-        return new ResponseEntity<>(body, ex.getHttpStatus());
+    public ResponseEntity<ApiResponse<Void>> handlePropertyNotFound(PropertyNotFoundException ex) {
+        return ResponseEntity.status(ex.getHttpStatus()).body(ApiResponse.error(ex.getHttpStatus().value(), ex.getMessage()));
     }
 
     @ExceptionHandler(BuildingNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleBuildingNotFound(BuildingNotFoundException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", ex.getHttpStatus().value());
-        body.put("message", ex.getMessage());
-        body.put("timestamp", LocalDateTime.now());
-        return new ResponseEntity<>(body, ex.getHttpStatus());
+    public ResponseEntity<ApiResponse<Void>> handleBuildingNotFound(BuildingNotFoundException ex) {
+        return ResponseEntity.status(ex.getHttpStatus()).body(ApiResponse.error(ex.getHttpStatus().value(), ex.getMessage()));
     }
 
     @ExceptionHandler(InvalidExpenseRequestException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidExpenseRequest(InvalidExpenseRequestException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", ex.getHttpStatus().value());
-        body.put("message", ex.getMessage());
-        body.put("timestamp", LocalDateTime.now());
-        return new ResponseEntity<>(body, ex.getHttpStatus());
+    public ResponseEntity<ApiResponse<Void>> handleInvalidExpenseRequest(InvalidExpenseRequestException ex) {
+        return ResponseEntity.status(ex.getHttpStatus()).body(ApiResponse.error(ex.getHttpStatus().value(), ex.getMessage()));
     }
 
     @ExceptionHandler(ExpenseNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleExpenseNotFound(ExpenseNotFoundException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", ex.getHttpStatus().value());
-        body.put("message", ex.getMessage());
-        body.put("timestamp", LocalDateTime.now());
-        return new ResponseEntity<>(body, ex.getHttpStatus());
+    public ResponseEntity<ApiResponse<Void>> handleExpenseNotFound(ExpenseNotFoundException ex) {
+        return ResponseEntity.status(ex.getHttpStatus()).body(ApiResponse.error(ex.getHttpStatus().value(), ex.getMessage()));
     }
 
     @ExceptionHandler(RentalContractNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleRentalContractNotFound(RentalContractNotFoundException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", ex.getHttpStatus().value());
-        body.put("message", ex.getMessage());
-        body.put("timestamp", LocalDateTime.now());
-        return new ResponseEntity<>(body, ex.getHttpStatus());
+    public ResponseEntity<ApiResponse<Void>> handleRentalContractNotFound(RentalContractNotFoundException ex) {
+        return ResponseEntity.status(ex.getHttpStatus()).body(ApiResponse.error(ex.getHttpStatus().value(), ex.getMessage()));
     }
 
     @ExceptionHandler(CustomException.class)
-    public ResponseEntity<Map<String, Object>> handleCustomException(CustomException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", ex.getHttpStatus().value());
-        body.put("message", ex.getMessage());
-        body.put("timestamp", LocalDateTime.now());
-        return new ResponseEntity<>(body, ex.getHttpStatus());
+    public ResponseEntity<ApiResponse<Void>> handleCustomException(CustomException ex) {
+        return ResponseEntity.status(ex.getHttpStatus()).body(ApiResponse.error(ex.getHttpStatus().value(), ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleAllUncaughtException(Exception ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        body.put("message", ex.getMessage());
-        body.put("timestamp", LocalDateTime.now());
-        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ApiResponse<Void>> handleAllUncaughtException(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), ex.getMessage()));
     }
 }

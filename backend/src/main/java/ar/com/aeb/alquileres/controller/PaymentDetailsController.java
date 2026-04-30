@@ -1,5 +1,6 @@
 package ar.com.aeb.alquileres.controller;
 
+import ar.com.aeb.alquileres.dto.ApiResponse;
 import ar.com.aeb.alquileres.dto.paymentDetails.PaymentDetailsResponse;
 import ar.com.aeb.alquileres.service.PaymentDetailsService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,8 +20,8 @@ public class PaymentDetailsController {
     private PaymentDetailsService paymentDetailsService;
 
     @GetMapping
-    public ResponseEntity<PaymentDetailsResponse> getPaymentDetails(@PathVariable Long propertyId) {
+    public ResponseEntity<ApiResponse<PaymentDetailsResponse>> getPaymentDetails(@PathVariable Long propertyId) {
         PaymentDetailsResponse paymentDetails = paymentDetailsService.getPaymentDetails(propertyId);
-        return ResponseEntity.ok(paymentDetails);
+        return ResponseEntity.ok(ApiResponse.success("Success", paymentDetails));
     }
 }

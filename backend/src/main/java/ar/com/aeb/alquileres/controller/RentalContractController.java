@@ -7,7 +7,6 @@ import ar.com.aeb.alquileres.model.RentalContract;
 import ar.com.aeb.alquileres.service.RentalContractService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,34 +21,34 @@ public class RentalContractController {
      * Get contract by ID
      */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getContractDetail(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<RentalContractResponse>> getContractDetail(@PathVariable Long id) {
         RentalContractResponse contract = rentalContractService.getDetail(id);
-        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), "Success", contract));
+        return ResponseEntity.ok(ApiResponse.success("Success", contract));
     }
 
     /**
      * Update a rental contract
      */
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateContract(@PathVariable Long id, @Valid @RequestBody RentalContractRequest request) {
+    public ResponseEntity<ApiResponse<RentalContractResponse>> updateContract(@PathVariable Long id, @Valid @RequestBody RentalContractRequest request) {
         RentalContractResponse response = rentalContractService.update(id, request);
-        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), "Rental contract updated successfully", response));
+        return ResponseEntity.ok(ApiResponse.success("Rental contract updated successfully", response));
     }
 
     /**
      * Update contract status
      */
     @PatchMapping("/{id}/status")
-    public ResponseEntity<?> updateContractStatus(@PathVariable Long id, @RequestParam RentalContract.RentalContractStatus status) {
+    public ResponseEntity<ApiResponse<RentalContractResponse>> updateContractStatus(@PathVariable Long id, @RequestParam RentalContract.RentalContractStatus status) {
         RentalContractResponse response = rentalContractService.updateStatus(id, status);
-        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), "Contract status updated successfully", response));
+        return ResponseEntity.ok(ApiResponse.success("Contract status updated successfully", response));
     }
 
     /**
      * Delete a rental contract
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteContract(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteContract(@PathVariable Long id) {
         rentalContractService.delete(id);
         return ResponseEntity.noContent().build();
     }

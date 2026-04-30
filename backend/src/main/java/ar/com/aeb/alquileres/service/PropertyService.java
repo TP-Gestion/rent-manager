@@ -52,10 +52,7 @@ public class PropertyService {
     public PropertyDetailsResponse getDetails(Long id) {
         Property property = findById(id);
         List<RentalContract> contracts = rentalContractRepository.findByPropertyId(id);
-        RentalContract activeContract = contracts.stream()
-                .filter(c -> c.getStatus() != RentalContract.RentalContractStatus.PAID)
-                .findFirst()
-                .orElse(null);
+        RentalContract activeContract = contracts.stream().filter(c -> c.getStatus() != RentalContract.RentalContractStatus.PAID).findFirst().orElse(null);
         return new PropertyDetailsResponse(property, activeContract);
     }
 
