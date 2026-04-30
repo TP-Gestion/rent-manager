@@ -5,6 +5,7 @@ import ar.com.aeb.alquileres.dto.property.PropertyDetailsResponse;
 import ar.com.aeb.alquileres.dto.property.PropertyRequest;
 import ar.com.aeb.alquileres.dto.property.PropertyResponse;
 import ar.com.aeb.alquileres.dto.property.PropertySummaryResponse;
+import ar.com.aeb.alquileres.dto.paymentDetails.PaymentDetailsResponse;
 import ar.com.aeb.alquileres.dto.tenant.TenantRequest;
 import ar.com.aeb.alquileres.dto.expense.ExpenseRequest;
 import ar.com.aeb.alquileres.dto.expense.ExpenseResponse;
@@ -13,6 +14,7 @@ import ar.com.aeb.alquileres.dto.rentalcontract.RentalContractResponse;
 import ar.com.aeb.alquileres.service.PropertyService;
 import ar.com.aeb.alquileres.service.ExpenseService;
 import ar.com.aeb.alquileres.service.RentalContractService;
+import ar.com.aeb.alquileres.service.PaymentDetailsService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,9 @@ public class PropertyController {
 
     @Autowired
     private RentalContractService rentalContractService;
+
+    @Autowired
+    private PaymentDetailsService paymentDetailsService;
 
     /**
      * CREATE - Add a new property
@@ -59,6 +64,15 @@ public class PropertyController {
     public ResponseEntity<ApiResponse<List<PropertySummaryResponse>>> getPropertiesSummary() {
         List<PropertySummaryResponse> summary = propertyService.getSummary();
         return ResponseEntity.ok(ApiResponse.success("Success", summary));
+    }
+
+    /**
+     * READ - Get payment details for a property
+     */
+    @GetMapping("/{id}/payment-details")
+    public ResponseEntity<ApiResponse<PaymentDetailsResponse>> getPropertyPaymentDetails(@PathVariable Long id) {
+        PaymentDetailsResponse paymentDetails = paymentDetailsService.getPaymentDetails(id);
+        return ResponseEntity.ok(ApiResponse.success("Success", paymentDetails));
     }
 
 
