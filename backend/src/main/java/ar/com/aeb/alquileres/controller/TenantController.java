@@ -27,32 +27,31 @@ public class TenantController {
     private TenantService tenantService;
 
     @PostMapping
-    public ResponseEntity<?> createTenant(@Valid @RequestBody TenantRequest request) {
+    public ResponseEntity<ApiResponse<TenantResponse>> createTenant(@Valid @RequestBody TenantRequest request) {
         TenantResponse response = tenantService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(HttpStatus.CREATED.value(), "Tenant created successfully", response));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(HttpStatus.CREATED.value(), "Tenant created successfully", response));
     }
 
     @GetMapping
-    public ResponseEntity<List<TenantResponse>> getAllTenants() {
+    public ResponseEntity<ApiResponse<List<TenantResponse>>> getAllTenants() {
         List<TenantResponse> tenants = tenantService.getAll();
-        return ResponseEntity.ok(tenants);
+        return ResponseEntity.ok(ApiResponse.success("Success", tenants));
     }
 
     @GetMapping("/{id}/detail")
-    public ResponseEntity<?> getTenantDetail(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<TenantResponse>> getTenantDetail(@PathVariable Long id) {
         TenantResponse tenant = tenantService.getDetail(id);
-        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), "Success", tenant));
+        return ResponseEntity.ok(ApiResponse.success("Success", tenant));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateTenant(
-                                          @PathVariable Long id, @Valid @RequestBody TenantRequest request) {
+    public ResponseEntity<ApiResponse<TenantResponse>> updateTenant(@PathVariable Long id, @Valid @RequestBody TenantRequest request) {
         TenantResponse response = tenantService.update(id, request);
-        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), "Tenant updated successfully", response));
+        return ResponseEntity.ok(ApiResponse.success("Tenant updated successfully", response));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteTenant(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteTenant(@PathVariable Long id) {
         tenantService.delete(id);
         return ResponseEntity.noContent().build();
     }

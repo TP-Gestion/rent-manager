@@ -9,17 +9,31 @@ public class ApiResponse<T> {
     private int status;
     private String message;
     private T data;
+    private Object errors;
     private LocalDateTime timestamp;
 
-    public ApiResponse(int status, String message, T data) {
+    private ApiResponse(int status, String message, T data, Object errors) {
         this.status = status;
         this.message = message;
         this.data = data;
+        this.errors = errors;
         this.timestamp = LocalDateTime.now();
     }
 
-    public ApiResponse(int status, String message) {
-        this(status, message, null);
+    public static <T> ApiResponse<T> success(int status, String message, T data) {
+        return new ApiResponse<>(status, message, data, null);
+    }
+
+    public static <T> ApiResponse<T> success(String message, T data) {
+        return success(200, message, data);
+    }
+
+    public static <T> ApiResponse<T> error(int status, String message, Object errors) {
+        return new ApiResponse<>(status, message, null, errors);
+    }
+
+    public static <T> ApiResponse<T> error(int status, String message) {
+        return error(status, message, null);
     }
 
     public int getStatus() {
@@ -44,6 +58,14 @@ public class ApiResponse<T> {
 
     public void setData(T data) {
         this.data = data;
+    }
+
+    public Object getErrors() {
+        return errors;
+    }
+
+    public void setErrors(Object errors) {
+        this.errors = errors;
     }
 
     public LocalDateTime getTimestamp() {

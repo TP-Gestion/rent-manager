@@ -35,9 +35,9 @@ class PropertyControllerTest extends BaseControllerTest {
     void testGetPropertyDetails_withValidId_returnsOk() throws Exception {
         // Setup
         Building building = buildingRepository.save(new Building("Test Building", "Test Address"));
-        
+
         Tenant tenant = tenantRepository.save(new Tenant("Juan", "Perez", "juan@example.com", "1122334455"));
-        
+
         Property property = new Property();
         property.setBuilding(building);
         property.setFloor("1A");
@@ -47,26 +47,20 @@ class PropertyControllerTest extends BaseControllerTest {
         property.setOccupancyStatus(Property.OccupancyStatus.OCCUPIED);
         property.setTenant(tenant);
         property = propertyRepository.save(property);
-        
+
         RentalContract contract = new RentalContract(property, new BigDecimal("1000.00"), LocalDate.now().plusDays(5));
         contract.setStatus(RentalContract.RentalContractStatus.PENDING);
         rentalContractRepository.save(contract);
 
         // Execute & Verify
-        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/details"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(property.getId()))
-                .andExpect(jsonPath("$.building.name").value("Test Building"))
-                .andExpect(jsonPath("$.tenant.firstName").value("Juan"))
-                .andExpect(jsonPath("$.activeContract.amount").value(1000.00))
-                .andExpect(jsonPath("$.occupancyStatus").value("OCCUPIED"));
+        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/details")).andExpect(status().isOk()).andExpect(jsonPath("$.id").value(property.getId())).andExpect(jsonPath("$.building.name").value("Test Building")).andExpect(jsonPath("$.tenant.firstName").value("Juan")).andExpect(jsonPath("$.activeContract.amount").value(1000.00)).andExpect(jsonPath("$.occupancyStatus").value("OCCUPIED"));
     }
 
     @Test
     void testAssignTenant_withValidIds_returnsOk() throws Exception {
         // Setup
         Building building = buildingRepository.save(new Building("Test Building", "Test Address"));
-        
+
         Property property = new Property();
         property.setBuilding(building);
         property.setFloor("2B");
@@ -75,14 +69,12 @@ class PropertyControllerTest extends BaseControllerTest {
         property.setUnitType("Studio");
         property.setOccupancyStatus(Property.OccupancyStatus.AVAILABLE);
         property = propertyRepository.save(property);
-        
+
         Tenant tenant = tenantRepository.save(new Tenant("Maria", "Lopez", "maria@example.com", "1133445566"));
 
         // Execute & Verify
-        mockMvc.perform(patch("/api/v1/properties/" + property.getId() + "/tenant/" + tenant.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.occupancyStatus").value("OCCUPIED"));
-        
+        mockMvc.perform(patch("/api/v1/properties/" + property.getId() + "/tenant/" + tenant.getId())).andExpect(status().isOk()).andExpect(jsonPath("$.occupancyStatus").value("OCCUPIED"));
+
         // Verify in DB
         Property updated = propertyRepository.findById(property.getId()).orElseThrow();
         assert updated.getTenant().getId().equals(tenant.getId());
@@ -105,11 +97,7 @@ class PropertyControllerTest extends BaseControllerTest {
         String tenantJson = "{\"firstName\":\"Carlos\",\"lastName\":\"Perez\",\"email\":\"carlos@example.com\",\"phone\":\"1122223333\"}";
 
         // Execute & Verify
-        mockMvc.perform(post("/api/v1/properties/" + property.getId() + "/tenants")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(tenantJson))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.occupancyStatus").value("OCCUPIED"));
+        mockMvc.perform(post("/api/v1/properties/" + property.getId() + "/tenants").contentType(MediaType.APPLICATION_JSON).content(tenantJson)).andExpect(status().isCreated()).andExpect(jsonPath("$.occupancyStatus").value("OCCUPIED"));
 
         // Verify in DB
         Property updated = propertyRepository.findById(property.getId()).orElseThrow();

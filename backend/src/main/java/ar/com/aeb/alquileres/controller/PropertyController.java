@@ -1,5 +1,6 @@
 package ar.com.aeb.alquileres.controller;
 
+import ar.com.aeb.alquileres.dto.ApiResponse;
 import ar.com.aeb.alquileres.dto.property.PropertyDetailsResponse;
 import ar.com.aeb.alquileres.dto.property.PropertyRequest;
 import ar.com.aeb.alquileres.dto.property.PropertyResponse;
@@ -36,72 +37,72 @@ public class PropertyController {
      * CREATE - Add a new property
      */
     @PostMapping
-    public ResponseEntity<PropertyResponse> createProperty(@Valid @RequestBody PropertyRequest request) {
+    public ResponseEntity<ApiResponse<PropertyResponse>> createProperty(@Valid @RequestBody PropertyRequest request) {
         PropertyResponse response = propertyService.create(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(HttpStatus.CREATED.value(), "Property created successfully", response));
     }
 
     /**
      * READ - Get all properties
      */
     @GetMapping
-    public ResponseEntity<List<PropertyResponse>> getProperties() {
+    public ResponseEntity<ApiResponse<List<PropertyResponse>>> getProperties() {
         List<PropertyResponse> properties = propertyService.getAll();
-        return ResponseEntity.ok(properties);
+        return ResponseEntity.ok(ApiResponse.success("Success", properties));
     }
 
     /**
      * READ - Get property by ID
      */
     @GetMapping("/{id}")
-    public ResponseEntity<PropertyResponse> getPropertyById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<PropertyResponse>> getPropertyById(@PathVariable Long id) {
         PropertyResponse property = propertyService.getById(id);
-        return ResponseEntity.ok(property);
+        return ResponseEntity.ok(ApiResponse.success("Success", property));
     }
 
     /**
      * READ - Get property details by ID
      */
     @GetMapping("/{id}/details")
-    public ResponseEntity<PropertyDetailsResponse> getPropertyDetails(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<PropertyDetailsResponse>> getPropertyDetails(@PathVariable Long id) {
         PropertyDetailsResponse details = propertyService.getDetails(id);
-        return ResponseEntity.ok(details);
+        return ResponseEntity.ok(ApiResponse.success("Success", details));
     }
 
     /**
      * CREATE - Add a new tenant to a property
      */
     @PostMapping("/{id}/tenants")
-    public ResponseEntity<PropertyResponse> createPropertyTenant(@PathVariable Long id, @Valid @RequestBody TenantRequest request) {
+    public ResponseEntity<ApiResponse<PropertyResponse>> createPropertyTenant(@PathVariable Long id, @Valid @RequestBody TenantRequest request) {
         PropertyResponse response = propertyService.createAndAssignTenant(id, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(HttpStatus.CREATED.value(), "Tenant created and assigned successfully", response));
     }
 
     /**
      * UPDATE - Assign a tenant to a property
      */
     @PatchMapping("/{id}/tenant/{tenantId}")
-    public ResponseEntity<PropertyResponse> assignTenant(@PathVariable Long id, @PathVariable Long tenantId) {
+    public ResponseEntity<ApiResponse<PropertyResponse>> assignTenant(@PathVariable Long id, @PathVariable Long tenantId) {
         PropertyResponse response = propertyService.assignTenant(id, tenantId);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success("Tenant assigned successfully", response));
     }
 
     /**
      * UPDATE - Remove a tenant from a property
      */
     @DeleteMapping("/{id}/tenant")
-    public ResponseEntity<PropertyResponse> removeTenant(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<PropertyResponse>> removeTenant(@PathVariable Long id) {
         PropertyResponse response = propertyService.removeTenant(id);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success("Tenant removed successfully", response));
     }
 
     /**
      * UPDATE - Update a property
      */
     @PutMapping("/{id}")
-    public ResponseEntity<PropertyResponse> updateProperty(@PathVariable Long id, @Valid @RequestBody PropertyRequest request) {
+    public ResponseEntity<ApiResponse<PropertyResponse>> updateProperty(@PathVariable Long id, @Valid @RequestBody PropertyRequest request) {
         PropertyResponse response = propertyService.update(id, request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success("Property updated successfully", response));
     }
 
     /**
@@ -117,44 +118,44 @@ public class PropertyController {
      * READ - Get total count of properties
      */
     @GetMapping("/count")
-    public ResponseEntity<Long> countProperties() {
+    public ResponseEntity<ApiResponse<Long>> countProperties() {
         long count = propertyService.count();
-        return ResponseEntity.ok(count);
+        return ResponseEntity.ok(ApiResponse.success("Success", count));
     }
 
     /**
      * READ - Get expenses for a property
      */
     @GetMapping("/{propertyId}/expenses")
-    public ResponseEntity<List<ExpenseResponse>> getPropertyExpenses(@PathVariable Long propertyId) {
+    public ResponseEntity<ApiResponse<List<ExpenseResponse>>> getPropertyExpenses(@PathVariable Long propertyId) {
         List<ExpenseResponse> response = expenseService.getExpenses(propertyId, null);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success("Success", response));
     }
 
     /**
      * CREATE - Add a new expense to a property
      */
     @PostMapping("/{propertyId}/expenses")
-    public ResponseEntity<List<ExpenseResponse>> createPropertyExpense(@PathVariable Long propertyId, @Valid @RequestBody ExpenseRequest request) {
+    public ResponseEntity<ApiResponse<List<ExpenseResponse>>> createPropertyExpense(@PathVariable Long propertyId, @Valid @RequestBody ExpenseRequest request) {
         List<ExpenseResponse> response = expenseService.createPropertyExpense(propertyId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(HttpStatus.CREATED.value(), "Expense created successfully", response));
     }
 
     /**
      * READ - Get rental contracts for a property
      */
     @GetMapping("/{propertyId}/rental-contract")
-    public ResponseEntity<List<RentalContractResponse>> getPropertyRentalContracts(@PathVariable Long propertyId) {
+    public ResponseEntity<ApiResponse<List<RentalContractResponse>>> getPropertyRentalContracts(@PathVariable Long propertyId) {
         List<RentalContractResponse> response = rentalContractService.getByProperty(propertyId);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success("Success", response));
     }
 
     /**
      * CREATE - Add a new rental contract to a property
      */
     @PostMapping("/{propertyId}/rental-contract")
-    public ResponseEntity<RentalContractResponse> createPropertyRentalContract(@PathVariable Long propertyId, @Valid @RequestBody RentalContractRequest request) {
+    public ResponseEntity<ApiResponse<RentalContractResponse>> createPropertyRentalContract(@PathVariable Long propertyId, @Valid @RequestBody RentalContractRequest request) {
         RentalContractResponse response = rentalContractService.create(propertyId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(HttpStatus.CREATED.value(), "Rental contract created successfully", response));
     }
 }

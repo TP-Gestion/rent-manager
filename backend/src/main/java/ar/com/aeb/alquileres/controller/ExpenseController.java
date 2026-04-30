@@ -1,5 +1,6 @@
 package ar.com.aeb.alquileres.controller;
 
+import ar.com.aeb.alquileres.dto.ApiResponse;
 import ar.com.aeb.alquileres.dto.expense.ExpenseResponse;
 import ar.com.aeb.alquileres.service.ExpenseService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,10 +19,10 @@ public class ExpenseController {
     private ExpenseService expenseService;
 
     @GetMapping
-    public ResponseEntity<List<ExpenseResponse>> getExpenses(
-                                                             @RequestParam(required = false) Long propertyId, @RequestParam(required = false) Long buildingId) {
+    public ResponseEntity<ApiResponse<List<ExpenseResponse>>> getExpenses(
+                                                                          @RequestParam(required = false) Long propertyId, @RequestParam(required = false) Long buildingId) {
         List<ExpenseResponse> expenses = expenseService.getExpenses(propertyId, buildingId);
-        return ResponseEntity.ok(expenses);
+        return ResponseEntity.ok(ApiResponse.success("Success", expenses));
     }
 
     @DeleteMapping("/{id}")
