@@ -1,0 +1,12 @@
+#Bdd
+postgres_data
+
+#Backend
+target
+build
+backend/bin
+.idea
+.gradle
+backend/gradlew.bat
+*.env
+backend/.env.properties
