@@ -21,9 +21,9 @@ public class TenantService {
     private TenantRepository tenantRepository;
 
     /**
-     * Create a new tenant
+     * Create a new tenant entity
      */
-    public TenantResponse create(TenantRequest request) {
+    public Tenant createEntity(TenantRequest request) {
         // Validate if email already exists
         if (tenantRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new DuplicateEmailException(request.getEmail());
@@ -38,8 +38,22 @@ public class TenantService {
                 request.getFirstName(), request.getLastName(), request.getEmail(), request.getPhone()
         );
 
-        Tenant saved = tenantRepository.save(tenant);
+        return tenantRepository.save(tenant);
+    }
+
+    /**
+     * Create a new tenant
+     */
+    public TenantResponse create(TenantRequest request) {
+        Tenant saved = createEntity(request);
         return new TenantResponse(saved);
+    }
+
+    /**
+     * Get tenant entity by ID
+     */
+    public Tenant findById(Long id) {
+        return tenantRepository.findById(id).orElseThrow(() -> new TenantNotFoundException(id));
     }
 
     /**
@@ -47,7 +61,7 @@ public class TenantService {
      */
     @Transactional(readOnly = true)
     public TenantResponse getDetail(Long id) {
-        Tenant tenant = tenantRepository.findById(id).orElseThrow(() -> new TenantNotFoundException(id));
+        Tenant tenant = findById(id);
         return new TenantResponse(tenant);
     }
 

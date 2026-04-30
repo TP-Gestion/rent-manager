@@ -1,5 +1,7 @@
 package ar.com.aeb.alquileres.service;
 
+import ar.com.aeb.alquileres.dto.tenant.TenantRequest;
+import ar.com.aeb.alquileres.dto.property.PropertyDetailsResponse;
 import ar.com.aeb.alquileres.dto.property.PropertyRequest;
 import ar.com.aeb.alquileres.dto.property.PropertyResponse;
 import ar.com.aeb.alquileres.exception.building.BuildingNotFoundException;
@@ -7,6 +9,8 @@ import ar.com.aeb.alquileres.exception.property.DuplicatePropertyException;
 import ar.com.aeb.alquileres.exception.property.PropertyNotFoundException;
 import ar.com.aeb.alquileres.model.Building;
 import ar.com.aeb.alquileres.model.Property;
+import ar.com.aeb.alquileres.model.RentalContract;
+import ar.com.aeb.alquileres.model.Tenant;
 import ar.com.aeb.alquileres.repository.BuildingRepository;
 import ar.com.aeb.alquileres.repository.PropertyRepository;
 import ar.com.aeb.alquileres.repository.RentalContractRepository;
@@ -45,6 +49,17 @@ public class PropertyService {
     }
 
     @Transactional(readOnly = true)
+    public PropertyDetailsResponse getDetails(Long id) {
+        Property property = findById(id);
+        List<RentalContract> contracts = rentalContractRepository.findByPropertyId(id);
+        RentalContract activeContract = contracts.stream()
+                .filter(c -> c.getStatus() != RentalContract.RentalContractStatus.PAID)
+                .findFirst()
+                .orElse(null);
+        return new PropertyDetailsResponse(property, activeContract);
+    }
+
+    @Transactional(readOnly = true)
     public List<PropertyResponse> getAll() {
         return propertyRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
     }
@@ -77,6 +92,28 @@ public class PropertyService {
     @Transactional(readOnly = true)
     public long count() {
         return propertyRepository.count();
+    }
+
+    public PropertyResponse assignTenant(Long propertyId, Long tenantId) {
+        Property property = findById(propertyId);
+        property.setTenant(tenantService.findById(tenantId));
+        property.setOccupancyStatus(Property.OccupancyStatus.OCCUPIED);
+        return toDto(propertyRepository.save(property));
+    }
+
+    public PropertyResponse createAndAssignTenant(Long propertyId, TenantRequest request) {
+        Property property = findById(propertyId);
+        Tenant tenant = tenantService.createEntity(request);
+        property.setTenant(tenant);
+        property.setOccupancyStatus(Property.OccupancyStatus.OCCUPIED);
+        return toDto(propertyRepository.save(property));
+    }
+
+    public PropertyResponse removeTenant(Long propertyId) {
+        Property property = findById(propertyId);
+        property.setTenant(null);
+        property.setOccupancyStatus(Property.OccupancyStatus.AVAILABLE);
+        return toDto(propertyRepository.save(property));
     }
 
     public Property findById(Long id) {
