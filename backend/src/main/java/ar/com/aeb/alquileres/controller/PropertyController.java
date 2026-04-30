@@ -4,6 +4,7 @@ import ar.com.aeb.alquileres.dto.ApiResponse;
 import ar.com.aeb.alquileres.dto.property.PropertyDetailsResponse;
 import ar.com.aeb.alquileres.dto.property.PropertyRequest;
 import ar.com.aeb.alquileres.dto.property.PropertyResponse;
+import ar.com.aeb.alquileres.dto.property.PropertySummaryResponse;
 import ar.com.aeb.alquileres.dto.tenant.TenantRequest;
 import ar.com.aeb.alquileres.dto.expense.ExpenseRequest;
 import ar.com.aeb.alquileres.dto.expense.ExpenseResponse;
@@ -50,6 +51,16 @@ public class PropertyController {
         List<PropertyResponse> properties = propertyService.getAll();
         return ResponseEntity.ok(ApiResponse.success("Success", properties));
     }
+
+    /**
+     * READ - Get properties summary
+     */
+    @GetMapping("/summary")
+    public ResponseEntity<ApiResponse<List<PropertySummaryResponse>>> getPropertiesSummary() {
+        List<PropertySummaryResponse> summary = propertyService.getSummary();
+        return ResponseEntity.ok(ApiResponse.success("Success", summary));
+    }
+
 
     /**
      * READ - Get property by ID
