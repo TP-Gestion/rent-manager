@@ -90,30 +90,31 @@ class BillingControllerTest extends BaseControllerTest {
 
     @Test
     void test03_getBillable_responseHasCorrectFields() throws Exception {
-        buildPropertyWithContract(RentalContract.RentalContractStatus.PENDING, new BigDecimal("180000"));
+        Property property = buildPropertyWithContract(RentalContract.RentalContractStatus.PENDING, new BigDecimal("180000"));
+        String idFilter = "$.data[?(@.id == " + property.getId() + ")]";
 
         mockMvc.perform(get("/api/v1/properties/billable"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].id").exists())
-                .andExpect(jsonPath("$.data[0].unit").exists())
-                .andExpect(jsonPath("$.data[0].building").exists())
-                .andExpect(jsonPath("$.data[0].address").exists())
-                .andExpect(jsonPath("$.data[0].tenant").exists())
-                .andExpect(jsonPath("$.data[0].previousStatus").value("PENDING"))
-                .andExpect(jsonPath("$.data[0].rentAmount").value(180000))
-                .andExpect(jsonPath("$.data[0].totalAmount").exists())
-                .andExpect(jsonPath("$.data[0].dueDate").exists())
-                .andExpect(jsonPath("$.data[0].period").exists());
+                .andExpect(jsonPath(idFilter + ".unit").exists())
+                .andExpect(jsonPath(idFilter + ".building").exists())
+                .andExpect(jsonPath(idFilter + ".address").exists())
+                .andExpect(jsonPath(idFilter + ".tenant").exists())
+                .andExpect(jsonPath(idFilter + ".previousStatus", hasItem("PENDING")))
+                .andExpect(jsonPath(idFilter + ".rentAmount", hasItem(180000)))
+                .andExpect(jsonPath(idFilter + ".totalAmount").exists())
+                .andExpect(jsonPath(idFilter + ".dueDate").exists())
+                .andExpect(jsonPath(idFilter + ".period").exists());
     }
 
     @Test
-    void test04_getBillable_noBillableProperties_returnsEmptyList() throws Exception {
-        buildPropertyWithContract(RentalContract.RentalContractStatus.PAID, new BigDecimal("100000"));
+    void test04_getBillable_paidPropertyDoesNotAppearEvenWithOtherBillables() throws Exception {
+        Property paidProperty = buildPropertyWithContract(RentalContract.RentalContractStatus.PAID, new BigDecimal("100000"));
+        buildPropertyWithContract(RentalContract.RentalContractStatus.PENDING, new BigDecimal("100000"));
 
         mockMvc.perform(get("/api/v1/properties/billable"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data.length()").value(0));
+                .andExpect(jsonPath("$.data[*].id", not(hasItem(paidProperty.getId().intValue()))));
     }
 
     // ── POST /api/v1/billings ──────────────────────────────────────────────────
