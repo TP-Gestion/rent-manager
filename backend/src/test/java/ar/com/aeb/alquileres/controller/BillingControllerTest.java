@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -28,6 +29,9 @@ class BillingControllerTest extends BaseControllerTest {
 
     @Autowired
     private RentalContractRepository rentalContractRepository;
+
+    @Autowired
+    private BillingRepository billingRepository;
 
     private static int tenantCounter = 0;
 
@@ -238,5 +242,66 @@ class BillingControllerTest extends BaseControllerTest {
                     byte[] bytes = result.getResponse().getContentAsByteArray();
                     assert bytes.length > 0;
                 });
+    }
+
+    // ── GET /api/v1/properties/{id}/billings ──────────────────────────────────
+
+    private Billing buildBillingDirectly(Property property, String period, Billing.BillingStatus status) {
+        RentalContract contract = new RentalContract(property, new BigDecimal("150000"), LocalDate.now().plusDays(10));
+        contract.setStatus(RentalContract.RentalContractStatus.PENDING);
+        contract = rentalContractRepository.save(contract);
+
+        Billing billing = new Billing();
+        billing.setProperty(property);
+        billing.setRentalContract(contract);
+        billing.setPeriod(period);
+        billing.setRentAmount(new BigDecimal("150000"));
+        billing.setExpenses(BigDecimal.ZERO);
+        billing.setAdditionalCharges(BigDecimal.ZERO);
+        billing.setDebtAmount(BigDecimal.ZERO);
+        billing.setTotalAmount(new BigDecimal("150000"));
+        billing.setDueDate(LocalDate.now().plusDays(10));
+        billing.setStatus(status);
+        return billingRepository.save(billing);
+    }
+
+    @Test
+    void test12_getBillingsByProperty_returnsListWithCorrectFields() throws Exception {
+        Property property = buildPropertyWithContract(RentalContract.RentalContractStatus.PENDING, new BigDecimal("150000"));
+        buildBillingDirectly(property, "2026-04", Billing.BillingStatus.PENDING);
+
+        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/billings"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data[?(@.period == '2026-04')].id").exists())
+                .andExpect(jsonPath("$.data[?(@.period == '2026-04')].status", hasItem("PENDING")))
+                .andExpect(jsonPath("$.data[?(@.period == '2026-04')].amount").exists())
+                .andExpect(jsonPath("$.data[?(@.period == '2026-04')].dueDate").exists());
+    }
+
+    @Test
+    void test13_getBillingsByProperty_paidBillingIncludesPaymentDate() throws Exception {
+        Property property = buildPropertyWithContract(RentalContract.RentalContractStatus.PENDING, new BigDecimal("150000"));
+        buildBillingDirectly(property, "2026-03", Billing.BillingStatus.PENDING);
+
+        // Register payment to mark billing as PAID
+        String paymentBody = "{\"amount\":150000,\"paymentMethod\":\"BANK_TRANSFER\","
+                + "\"paymentDate\":\"2026-04-01\",\"selectedPeriods\":[\"2026-03\"]}";
+        mockMvc.perform(post("/api/v1/properties/" + property.getId() + "/payments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(paymentBody));
+
+        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/billings"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[?(@.period == '2026-03')].status", hasItem("PAID")))
+                .andExpect(jsonPath("$.data[?(@.period == '2026-03')].paymentDate", hasItem("2026-04-01")));
+    }
+
+    @Test
+    void test14_getBillingsByProperty_propertyNotFound_returnsNotFound() throws Exception {
+        mockMvc.perform(get("/api/v1/properties/99999/billings"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
     }
 }
