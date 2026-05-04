@@ -4,6 +4,8 @@ import ar.com.aeb.alquileres.dto.ApiResponse;
 import ar.com.aeb.alquileres.exception.building.BuildingNotFoundException;
 import ar.com.aeb.alquileres.exception.expense.ExpenseNotFoundException;
 import ar.com.aeb.alquileres.exception.expense.InvalidExpenseRequestException;
+import ar.com.aeb.alquileres.exception.payment.InvalidPaymentAmountException;
+import ar.com.aeb.alquileres.exception.payment.NoPendingContractException;
 import ar.com.aeb.alquileres.exception.property.PropertyNotFoundException;
 import ar.com.aeb.alquileres.exception.rentalContract.RentalContractNotFoundException;
 import ar.com.aeb.alquileres.exception.tenant.TenantNotFoundException;
@@ -76,6 +78,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RentalContractNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleRentalContractNotFound(RentalContractNotFoundException ex) {
+        return ResponseEntity.status(ex.getHttpStatus()).body(ApiResponse.error(ex.getHttpStatus().value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(NoPendingContractException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNoPendingContract(NoPendingContractException ex) {
+        return ResponseEntity.status(ex.getHttpStatus()).body(ApiResponse.error(ex.getHttpStatus().value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidPaymentAmountException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidPaymentAmount(InvalidPaymentAmountException ex) {
         return ResponseEntity.status(ex.getHttpStatus()).body(ApiResponse.error(ex.getHttpStatus().value(), ex.getMessage()));
     }
 
