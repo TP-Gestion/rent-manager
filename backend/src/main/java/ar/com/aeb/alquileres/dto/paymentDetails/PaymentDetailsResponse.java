@@ -2,15 +2,19 @@ package ar.com.aeb.alquileres.dto.paymentDetails;
 
 import ar.com.aeb.alquileres.dto.expense.ExpenseResponse;
 import ar.com.aeb.alquileres.dto.rentalcontract.RentalContractResponse;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PaymentDetailsResponse {
 
     private RentalContractResponse rentalContract;
     private List<ExpenseResponse> expenses;
     private BigDecimal totalDue;
+    private String paymentStatus;
+    private LocalDate earliestDueDate;
 
     public PaymentDetailsResponse(RentalContractResponse rentalContract, List<ExpenseResponse> expenses) {
         this.rentalContract = rentalContract;
@@ -59,5 +63,21 @@ public class PaymentDetailsResponse {
 
     public void setTotalDue(BigDecimal totalDue) {
         this.totalDue = totalDue;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public LocalDate getEarliestDueDate() {
+        return earliestDueDate;
+    }
+
+    public void setEarliestDueDate(LocalDate earliestDueDate) {
+        this.earliestDueDate = earliestDueDate;
     }
 }
