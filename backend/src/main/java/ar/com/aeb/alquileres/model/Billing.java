@@ -45,6 +45,10 @@ public class Billing extends BaseEntity {
     @Column(nullable = false)
     private boolean notified = false;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_id")
+    private Payment payment;
+
     public Billing() {
     }
 
@@ -134,6 +138,14 @@ public class Billing extends BaseEntity {
 
     public void setNotified(boolean notified) {
         this.notified = notified;
+    }
+
+    public Payment getPayment() {
+        return payment;
+    }
+
+    public void setPayment(Payment payment) {
+        this.payment = payment;
     }
 
     public enum BillingStatus {

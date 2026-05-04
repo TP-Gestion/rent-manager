@@ -1,20 +1,23 @@
 package ar.com.aeb.alquileres.dto.payment;
 
+import ar.com.aeb.alquileres.model.Billing;
 import ar.com.aeb.alquileres.model.Payment;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class PaymentResponse {
 
     private Long id;
     private Long propertyId;
-    private Long rentalContractId;
-    private LocalDate paymentDate;
-    private BigDecimal totalAmount;
+    private LocalDate date;
+    private BigDecimal amount;
     private String paymentMethod;
+    private String reference;
     private String notes;
+    private List<String> periods;
     private LocalDateTime createdAt;
 
     public PaymentResponse() {
@@ -23,11 +26,14 @@ public class PaymentResponse {
     public PaymentResponse(Payment payment) {
         this.id = payment.getId();
         this.propertyId = payment.getProperty().getId();
-        this.rentalContractId = payment.getRentalContract().getId();
-        this.paymentDate = payment.getPaymentDate();
-        this.totalAmount = payment.getTotalAmount();
+        this.date = payment.getPaymentDate();
+        this.amount = payment.getAmount();
         this.paymentMethod = payment.getPaymentMethod().toString();
+        this.reference = payment.getReference();
         this.notes = payment.getNotes();
+        this.periods = payment.getBillings().stream()
+                .map(Billing::getPeriod)
+                .toList();
         this.createdAt = payment.getCreatedAt();
     }
 
@@ -47,28 +53,20 @@ public class PaymentResponse {
         this.propertyId = propertyId;
     }
 
-    public Long getRentalContractId() {
-        return rentalContractId;
+    public LocalDate getDate() {
+        return date;
     }
 
-    public void setRentalContractId(Long rentalContractId) {
-        this.rentalContractId = rentalContractId;
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
-    public LocalDate getPaymentDate() {
-        return paymentDate;
+    public BigDecimal getAmount() {
+        return amount;
     }
 
-    public void setPaymentDate(LocalDate paymentDate) {
-        this.paymentDate = paymentDate;
-    }
-
-    public BigDecimal getTotalAmount() {
-        return totalAmount;
-    }
-
-    public void setTotalAmount(BigDecimal totalAmount) {
-        this.totalAmount = totalAmount;
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
     }
 
     public String getPaymentMethod() {
@@ -79,12 +77,28 @@ public class PaymentResponse {
         this.paymentMethod = paymentMethod;
     }
 
+    public String getReference() {
+        return reference;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
     public String getNotes() {
         return notes;
     }
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public List<String> getPeriods() {
+        return periods;
+    }
+
+    public void setPeriods(List<String> periods) {
+        this.periods = periods;
     }
 
     public LocalDateTime getCreatedAt() {

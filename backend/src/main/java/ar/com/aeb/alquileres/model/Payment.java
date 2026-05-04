@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "PAYMENTS")
@@ -17,18 +19,13 @@ public class Payment extends BaseEntity {
     private Property property;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "rental_contract_id", nullable = false)
-    private RentalContract rentalContract;
-
-    @NotNull
     @Column(name = "payment_date", nullable = false)
     private LocalDate paymentDate;
 
     @NotNull
     @Positive(message = "The amount must be greater than 0")
-    @Column(name = "total_amount", nullable = false)
-    private BigDecimal totalAmount;
+    @Column(nullable = false)
+    private BigDecimal amount;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -36,18 +33,15 @@ public class Payment extends BaseEntity {
     private PaymentMethod paymentMethod;
 
     @Column
+    private String reference;
+
+    @Column
     private String notes;
 
-    public Payment() {
-    }
+    @OneToMany(mappedBy = "payment", fetch = FetchType.EAGER)
+    private List<Billing> billings = new ArrayList<>();
 
-    public Payment(Property property, RentalContract rentalContract, LocalDate paymentDate, BigDecimal totalAmount, PaymentMethod paymentMethod, String notes) {
-        this.property = property;
-        this.rentalContract = rentalContract;
-        this.paymentDate = paymentDate;
-        this.totalAmount = totalAmount;
-        this.paymentMethod = paymentMethod;
-        this.notes = notes;
+    public Payment() {
     }
 
     public Property getProperty() {
@@ -58,14 +52,6 @@ public class Payment extends BaseEntity {
         this.property = property;
     }
 
-    public RentalContract getRentalContract() {
-        return rentalContract;
-    }
-
-    public void setRentalContract(RentalContract rentalContract) {
-        this.rentalContract = rentalContract;
-    }
-
     public LocalDate getPaymentDate() {
         return paymentDate;
     }
@@ -74,12 +60,12 @@ public class Payment extends BaseEntity {
         this.paymentDate = paymentDate;
     }
 
-    public BigDecimal getTotalAmount() {
-        return totalAmount;
+    public BigDecimal getAmount() {
+        return amount;
     }
 
-    public void setTotalAmount(BigDecimal totalAmount) {
-        this.totalAmount = totalAmount;
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
     }
 
     public PaymentMethod getPaymentMethod() {
@@ -90,6 +76,14 @@ public class Payment extends BaseEntity {
         this.paymentMethod = paymentMethod;
     }
 
+    public String getReference() {
+        return reference;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
     public String getNotes() {
         return notes;
     }
@@ -98,7 +92,15 @@ public class Payment extends BaseEntity {
         this.notes = notes;
     }
 
+    public List<Billing> getBillings() {
+        return billings;
+    }
+
+    public void setBillings(List<Billing> billings) {
+        this.billings = billings;
+    }
+
     public enum PaymentMethod {
-        CASH, TRANSFER, CHECK
+        BANK_TRANSFER, CASH, CHECK, DEBIT, CREDIT
     }
 }

@@ -16,7 +16,7 @@ public class ExcelExportService {
 
     private static final String[] HEADERS = {
         "ID", "Fecha de Pago", "Inquilino", "Propiedad", "Edificio",
-        "Período (vencimiento)", "Monto", "Medio de Pago", "Observaciones"
+        "Períodos", "Monto", "Medio de Pago", "Referencia", "Observaciones"
     };
 
     public byte[] exportPayments(List<Payment> payments) {
@@ -46,16 +46,21 @@ public class ExcelExportService {
                 String tenantName = tenant != null
                         ? tenant.getFirstName() + " " + tenant.getLastName()
                         : "-";
+                String periods = payment.getBillings().stream()
+                        .map(ar.com.aeb.alquileres.model.Billing::getPeriod)
+                        .reduce((a, b) -> a + ", " + b)
+                        .orElse("");
 
                 row.createCell(0).setCellValue(payment.getId());
                 row.createCell(1).setCellValue(payment.getPaymentDate().toString());
                 row.createCell(2).setCellValue(tenantName);
                 row.createCell(3).setCellValue("Piso " + payment.getProperty().getFloor());
                 row.createCell(4).setCellValue(payment.getProperty().getBuilding().getName());
-                row.createCell(5).setCellValue(payment.getRentalContract().getDueDate().toString());
-                row.createCell(6).setCellValue(payment.getTotalAmount().doubleValue());
+                row.createCell(5).setCellValue(periods);
+                row.createCell(6).setCellValue(payment.getAmount().doubleValue());
                 row.createCell(7).setCellValue(payment.getPaymentMethod().toString());
-                row.createCell(8).setCellValue(payment.getNotes() != null ? payment.getNotes() : "");
+                row.createCell(8).setCellValue(payment.getReference() != null ? payment.getReference() : "");
+                row.createCell(9).setCellValue(payment.getNotes() != null ? payment.getNotes() : "");
             }
 
             for (int i = 0; i < HEADERS.length; i++) {

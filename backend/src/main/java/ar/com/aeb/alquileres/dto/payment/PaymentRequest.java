@@ -1,40 +1,40 @@
 package ar.com.aeb.alquileres.dto.payment;
 
 import ar.com.aeb.alquileres.model.Payment;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 public class PaymentRequest {
 
-    @NotNull(message = "Payment date is required")
+    @NotNull(message = "El monto es obligatorio")
+    @Positive(message = "Debe ingresar un monto válido")
+    private BigDecimal amount;
+
+    @NotNull(message = "Debe seleccionar un medio de pago válido")
+    private Payment.PaymentMethod paymentMethod;
+
+    @NotNull(message = "La fecha de pago es obligatoria")
     private LocalDate paymentDate;
 
-    @NotNull(message = "Total amount is required")
-    @Positive(message = "Total amount must be greater than 0")
-    private BigDecimal totalAmount;
-
-    @NotNull(message = "Payment method is required")
-    private Payment.PaymentMethod paymentMethod;
+    private String reference;
 
     private String notes;
 
-    public LocalDate getPaymentDate() {
-        return paymentDate;
+    @NotNull(message = "Debe seleccionar al menos un período a pagar")
+    @NotEmpty(message = "Debe seleccionar al menos un período a pagar")
+    private List<String> selectedPeriods;
+
+    public BigDecimal getAmount() {
+        return amount;
     }
 
-    public void setPaymentDate(LocalDate paymentDate) {
-        this.paymentDate = paymentDate;
-    }
-
-    public BigDecimal getTotalAmount() {
-        return totalAmount;
-    }
-
-    public void setTotalAmount(BigDecimal totalAmount) {
-        this.totalAmount = totalAmount;
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
     }
 
     public Payment.PaymentMethod getPaymentMethod() {
@@ -45,11 +45,35 @@ public class PaymentRequest {
         this.paymentMethod = paymentMethod;
     }
 
+    public LocalDate getPaymentDate() {
+        return paymentDate;
+    }
+
+    public void setPaymentDate(LocalDate paymentDate) {
+        this.paymentDate = paymentDate;
+    }
+
+    public String getReference() {
+        return reference;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
     public String getNotes() {
         return notes;
     }
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public List<String> getSelectedPeriods() {
+        return selectedPeriods;
+    }
+
+    public void setSelectedPeriods(List<String> selectedPeriods) {
+        this.selectedPeriods = selectedPeriods;
     }
 }

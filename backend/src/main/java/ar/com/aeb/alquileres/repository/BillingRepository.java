@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface BillingRepository extends JpaRepository<Billing, Long> {
     List<Billing> findByPropertyId(Long propertyId);
+
+    java.util.Optional<Billing> findByPropertyIdAndPeriod(Long propertyId, String period);
 }
