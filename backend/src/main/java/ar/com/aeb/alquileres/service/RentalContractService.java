@@ -10,11 +10,17 @@ import ar.com.aeb.alquileres.model.RentalContract;
 import ar.com.aeb.alquileres.model.Property;
 import ar.com.aeb.alquileres.repository.RentalContractRepository;
 import ar.com.aeb.alquileres.repository.PropertyRepository;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Transactional
@@ -25,6 +31,12 @@ public class RentalContractService {
 
     @Autowired
     private PropertyRepository propertyRepository;
+
+    @Autowired
+    private FileStorageService fileStorageService;
+
+    @org.springframework.beans.factory.annotation.Value("${upload.contracts.path:uploads/contracts}")
+    private String uploadPath;
 
     /**
      * Create a new rental contract
@@ -42,8 +54,40 @@ public class RentalContractService {
                 property, request.getAmount(), request.getDueDate()
         );
 
+        MultipartFile file = request.getContract();
+        if (file != null && !file.isEmpty()) {
+            YearMonth now = YearMonth.now();
+            String fileName = fileStorageService.storeFile(uploadPath, file,
+                    String.valueOf(now.getYear()),
+                    String.format("%02d", now.getMonthValue()));
+            contract.setContractPath(fileName);
+        }
+
         RentalContract saved = rentalContractRepository.save(contract);
         return new RentalContractResponse(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public Resource getContractResource(Long id) {
+        RentalContract contract = rentalContractRepository.findById(id)
+                .orElseThrow(() -> new RentalContractNotFoundException(id));
+
+        if (contract.getContractPath() == null) {
+            throw new RuntimeException("No contract file found for this record");
+        }
+
+        try {
+            java.nio.file.Path filePath = java.nio.file.Paths.get(uploadPath).resolve(contract.getContractPath()).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+
+            if (resource.exists()) {
+                return resource;
+            } else {
+                throw new RuntimeException("File not found " + contract.getContractPath());
+            }
+        } catch (java.net.MalformedURLException e) {
+            throw new RuntimeException("Error retrieving file " + contract.getContractPath(), e);
+        }
     }
 
     /**

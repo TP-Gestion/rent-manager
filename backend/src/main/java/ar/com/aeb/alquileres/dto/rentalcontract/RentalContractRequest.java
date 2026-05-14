@@ -14,6 +14,8 @@ public class RentalContractRequest {
     @NotNull(message = "Due date cannot be null")
     private LocalDate dueDate;
 
+    private org.springframework.web.multipart.MultipartFile contract;
+
     public RentalContractRequest() {
     }
 
@@ -37,5 +39,13 @@ public class RentalContractRequest {
 
     public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
+    }
+
+    public org.springframework.web.multipart.MultipartFile getContract() {
+        return contract;
+    }
+
+    public void setContract(org.springframework.web.multipart.MultipartFile contract) {
+        this.contract = contract;
     }
 }

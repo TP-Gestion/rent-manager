@@ -38,6 +38,9 @@ public class Payment extends BaseEntity {
     @Column
     private String notes;
 
+    @Column(name = "receipt_path")
+    private String receiptPath;
+
     @OneToMany(mappedBy = "payment", fetch = FetchType.EAGER)
     private List<Billing> billings = new ArrayList<>();
 
@@ -90,6 +93,14 @@ public class Payment extends BaseEntity {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public String getReceiptPath() {
+        return receiptPath;
+    }
+
+    public void setReceiptPath(String receiptPath) {
+        this.receiptPath = receiptPath;
     }
 
     public List<Billing> getBillings() {

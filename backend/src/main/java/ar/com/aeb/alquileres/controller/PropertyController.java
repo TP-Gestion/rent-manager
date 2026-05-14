@@ -17,7 +17,10 @@ import ar.com.aeb.alquileres.service.RentalContractService;
 import ar.com.aeb.alquileres.service.PaymentDetailsService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -178,9 +181,23 @@ public class PropertyController {
     /**
      * CREATE - Add a new rental contract to a property
      */
-    @PostMapping("/{propertyId}/rental-contract")
-    public ResponseEntity<ApiResponse<RentalContractResponse>> createPropertyRentalContract(@PathVariable Long propertyId, @Valid @RequestBody RentalContractRequest request) {
+    @PostMapping(value = "/{propertyId}/rental-contract", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<RentalContractResponse>> createPropertyRentalContract(
+            @PathVariable Long propertyId,
+            @Valid @ModelAttribute RentalContractRequest request) {
         RentalContractResponse response = rentalContractService.create(propertyId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(HttpStatus.CREATED.value(), "Rental contract created successfully", response));
+    }
+
+    /**
+     * READ - Get contract file
+     */
+    @GetMapping("/{propertyId}/rental-contract/{contractId}/file")
+    public ResponseEntity<Resource> getContractFile(@PathVariable Long propertyId, @PathVariable Long contractId) {
+        Resource resource = rentalContractService.getContractResource(contractId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
     }
 }
