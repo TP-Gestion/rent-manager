@@ -4,6 +4,8 @@ import ar.com.aeb.alquileres.dto.ApiResponse;
 import ar.com.aeb.alquileres.dto.property.PropertyDetailsResponse;
 import ar.com.aeb.alquileres.dto.property.PropertyRequest;
 import ar.com.aeb.alquileres.dto.property.PropertyResponse;
+import ar.com.aeb.alquileres.dto.property.PropertySummaryResponse;
+import ar.com.aeb.alquileres.dto.paymentDetails.PaymentDetailsResponse;
 import ar.com.aeb.alquileres.dto.tenant.TenantRequest;
 import ar.com.aeb.alquileres.dto.expense.ExpenseRequest;
 import ar.com.aeb.alquileres.dto.expense.ExpenseResponse;
@@ -12,9 +14,13 @@ import ar.com.aeb.alquileres.dto.rentalcontract.RentalContractResponse;
 import ar.com.aeb.alquileres.service.PropertyService;
 import ar.com.aeb.alquileres.service.ExpenseService;
 import ar.com.aeb.alquileres.service.RentalContractService;
+import ar.com.aeb.alquileres.service.PaymentDetailsService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +39,9 @@ public class PropertyController {
     @Autowired
     private RentalContractService rentalContractService;
 
+    @Autowired
+    private PaymentDetailsService paymentDetailsService;
+
     /**
      * CREATE - Add a new property
      */
@@ -50,6 +59,25 @@ public class PropertyController {
         List<PropertyResponse> properties = propertyService.getAll();
         return ResponseEntity.ok(ApiResponse.success("Success", properties));
     }
+
+    /**
+     * READ - Get properties summary
+     */
+    @GetMapping("/summary")
+    public ResponseEntity<ApiResponse<List<PropertySummaryResponse>>> getPropertiesSummary() {
+        List<PropertySummaryResponse> summary = propertyService.getSummary();
+        return ResponseEntity.ok(ApiResponse.success("Success", summary));
+    }
+
+    /**
+     * READ - Get payment details for a property
+     */
+    @GetMapping("/{id}/payment-details")
+    public ResponseEntity<ApiResponse<PaymentDetailsResponse>> getPropertyPaymentDetails(@PathVariable Long id) {
+        PaymentDetailsResponse paymentDetails = paymentDetailsService.getPaymentDetails(id);
+        return ResponseEntity.ok(ApiResponse.success("Success", paymentDetails));
+    }
+
 
     /**
      * READ - Get property by ID
@@ -153,9 +181,23 @@ public class PropertyController {
     /**
      * CREATE - Add a new rental contract to a property
      */
-    @PostMapping("/{propertyId}/rental-contract")
-    public ResponseEntity<ApiResponse<RentalContractResponse>> createPropertyRentalContract(@PathVariable Long propertyId, @Valid @RequestBody RentalContractRequest request) {
+    @PostMapping(value = "/{propertyId}/rental-contract", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<RentalContractResponse>> createPropertyRentalContract(
+            @PathVariable Long propertyId,
+            @Valid @ModelAttribute RentalContractRequest request) {
         RentalContractResponse response = rentalContractService.create(propertyId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(HttpStatus.CREATED.value(), "Rental contract created successfully", response));
+    }
+
+    /**
+     * READ - Get contract file
+     */
+    @GetMapping("/{propertyId}/rental-contract/{contractId}/file")
+    public ResponseEntity<Resource> getContractFile(@PathVariable Long propertyId, @PathVariable Long contractId) {
+        Resource resource = rentalContractService.getContractResource(contractId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
     }
 }
