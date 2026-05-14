@@ -14,7 +14,13 @@ import ar.com.aeb.alquileres.repository.PropertyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +37,13 @@ public class PaymentService {
     @Autowired
     private BillingRepository billingRepository;
 
-    public PaymentResponse registerPayment(Long propertyId, PaymentRequest request) {
+    @Autowired
+    private FileStorageService fileStorageService;
+
+    @org.springframework.beans.factory.annotation.Value("${upload.payments.path:uploads/payments}")
+    private String uploadPath;
+
+    public PaymentResponse registerPayment(Long propertyId, PaymentRequest request, MultipartFile receipt) {
         Property property = propertyRepository.findById(propertyId)
                 .orElseThrow(() -> new PropertyNotFoundException(propertyId));
 
@@ -53,6 +65,15 @@ public class PaymentService {
         payment.setPaymentMethod(request.getPaymentMethod());
         payment.setReference(request.getReference());
         payment.setNotes(request.getNotes());
+
+        if (receipt != null && !receipt.isEmpty()) {
+            // Use the first period to determine the folder structure (YYYY/MM)
+            String period = request.getSelectedPeriods().get(0);
+            String[] periodParts = period.split("-");
+            String fileName = fileStorageService.storeFile(uploadPath, receipt, periodParts[0], periodParts[1]);
+            payment.setReceiptPath(fileName);
+        }
+
         payment = paymentRepository.save(payment);
 
         for (Billing billing : billingsToPay) {
@@ -63,6 +84,29 @@ public class PaymentService {
         }
 
         return new PaymentResponse(payment);
+    }
+
+    @Transactional(readOnly = true)
+    public Resource getReceipt(Long paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new ar.com.aeb.alquileres.exception.payment.PaymentNotFoundException(paymentId));
+
+        if (payment.getReceiptPath() == null) {
+            throw new RuntimeException("No receipt found for this payment");
+        }
+
+        try {
+            Path filePath = Paths.get(uploadPath).resolve(payment.getReceiptPath()).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+
+            if (resource.exists()) {
+                return resource;
+            } else {
+                throw new RuntimeException("File not found " + payment.getReceiptPath());
+            }
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Error retrieving file " + payment.getReceiptPath(), e);
+        }
     }
 
     @Transactional(readOnly = true)

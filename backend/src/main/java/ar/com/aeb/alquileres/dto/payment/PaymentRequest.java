@@ -19,6 +19,7 @@ public class PaymentRequest {
     private Payment.PaymentMethod paymentMethod;
 
     @NotNull(message = "La fecha de pago es obligatoria")
+    @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
     private LocalDate paymentDate;
 
     private String reference;
@@ -28,6 +29,8 @@ public class PaymentRequest {
     @NotNull(message = "Debe seleccionar al menos un período a pagar")
     @NotEmpty(message = "Debe seleccionar al menos un período a pagar")
     private List<String> selectedPeriods;
+
+    private org.springframework.web.multipart.MultipartFile receipt;
 
     public BigDecimal getAmount() {
         return amount;
@@ -75,5 +78,13 @@ public class PaymentRequest {
 
     public void setSelectedPeriods(List<String> selectedPeriods) {
         this.selectedPeriods = selectedPeriods;
+    }
+
+    public org.springframework.web.multipart.MultipartFile getReceipt() {
+        return receipt;
+    }
+
+    public void setReceipt(org.springframework.web.multipart.MultipartFile receipt) {
+        this.receipt = receipt;
     }
 }
