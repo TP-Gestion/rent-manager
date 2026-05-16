@@ -184,7 +184,7 @@ public class PropertyController {
     @PostMapping(value = "/{propertyId}/rental-contract", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<RentalContractResponse>> createPropertyRentalContract(
             @PathVariable Long propertyId,
-            @Valid @ModelAttribute RentalContractRequest request) {
+            @ModelAttribute RentalContractRequest request) {
         RentalContractResponse response = rentalContractService.create(propertyId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(HttpStatus.CREATED.value(), "Rental contract created successfully", response));
     }

@@ -8,8 +8,10 @@ import ar.com.aeb.alquileres.exception.rentalContract.RentalContractNotFoundExce
 import ar.com.aeb.alquileres.exception.rentalContract.DuplicateActiveContractException;
 import ar.com.aeb.alquileres.model.RentalContract;
 import ar.com.aeb.alquileres.model.Property;
+import ar.com.aeb.alquileres.model.Billing;
 import ar.com.aeb.alquileres.repository.RentalContractRepository;
 import ar.com.aeb.alquileres.repository.PropertyRepository;
+import ar.com.aeb.alquileres.repository.BillingRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -34,6 +36,9 @@ public class RentalContractService {
 
     @Autowired
     private FileStorageService fileStorageService;
+
+    @Autowired
+    private BillingRepository billingRepository;
 
     @org.springframework.beans.factory.annotation.Value("${upload.contracts.path:uploads/contracts}")
     private String uploadPath;
@@ -123,11 +128,20 @@ public class RentalContractService {
     public RentalContractResponse update(Long id, RentalContractRequest request) {
         RentalContract contract = rentalContractRepository.findById(id).orElseThrow(() -> new RentalContractNotFoundException(id));
 
-        contract.setAmount(request.getAmount());
-        contract.setDueDate(request.getDueDate());
+        if (request.getAmount() != null) {
+            contract.setAmount(request.getAmount());
+        }
+        if (request.getDueDate() != null) {
+            contract.setDueDate(request.getDueDate());
+        }
 
         MultipartFile file = request.getContract();
         if (file != null && !file.isEmpty()) {
+            // Delete old file if exists
+            if (contract.getContractPath() != null) {
+                fileStorageService.deleteFile(uploadPath, contract.getContractPath());
+            }
+
             YearMonth now = YearMonth.now();
             String fileName = fileStorageService.storeFile(uploadPath, file,
                     String.valueOf(now.getYear()),
@@ -144,6 +158,16 @@ public class RentalContractService {
      */
     public void delete(Long id) {
         RentalContract contract = rentalContractRepository.findById(id).orElseThrow(() -> new RentalContractNotFoundException(id));
+        
+        // Delete related billings
+        List<Billing> billings = billingRepository.findByRentalContractId(id);
+        billingRepository.deleteAll(billings);
+
+        // Delete file if exists
+        if (contract.getContractPath() != null) {
+            fileStorageService.deleteFile(uploadPath, contract.getContractPath());
+        }
+        
         rentalContractRepository.delete(contract);
     }
 

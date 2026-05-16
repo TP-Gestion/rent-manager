@@ -30,7 +30,9 @@ public class RentalContractController {
      * Update a rental contract
      */
     @PutMapping(value = "/{id}", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ApiResponse<RentalContractResponse>> updateContract(@PathVariable Long id, @Valid @ModelAttribute RentalContractRequest request) {
+    public ResponseEntity<ApiResponse<RentalContractResponse>> updateContract(
+            @PathVariable Long id,
+            @ModelAttribute RentalContractRequest request) {
         RentalContractResponse response = rentalContractService.update(id, request);
         return ResponseEntity.ok(ApiResponse.success("Rental contract updated successfully", response));
     }
