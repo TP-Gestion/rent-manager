@@ -37,4 +37,16 @@ public class FileStorageService {
             throw new RuntimeException("Could not store file " + file.getOriginalFilename() + ". Please try again!", e);
         }
     }
+
+    public void deleteFile(String basePath, String filePath) {
+        if (filePath == null || filePath.isEmpty()) {
+            return;
+        }
+        try {
+            Path path = Paths.get(basePath).resolve(filePath).normalize();
+            Files.deleteIfExists(path);
+        } catch (IOException e) {
+            throw new RuntimeException("Could not delete file " + filePath, e);
+        }
+    }
 }
