@@ -10,3 +10,5 @@ backend/bin
 backend/gradlew.bat
 *.env
 backend/.env.properties
+uploads/
+**/uploads/
