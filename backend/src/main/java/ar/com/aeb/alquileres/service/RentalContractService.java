@@ -126,6 +126,15 @@ public class RentalContractService {
         contract.setAmount(request.getAmount());
         contract.setDueDate(request.getDueDate());
 
+        MultipartFile file = request.getContract();
+        if (file != null && !file.isEmpty()) {
+            YearMonth now = YearMonth.now();
+            String fileName = fileStorageService.storeFile(uploadPath, file,
+                    String.valueOf(now.getYear()),
+                    String.format("%02d", now.getMonthValue()));
+            contract.setContractPath(fileName);
+        }
+
         RentalContract updated = rentalContractRepository.save(contract);
         return new RentalContractResponse(updated);
     }
