@@ -39,8 +39,7 @@ class BillingControllerTest extends BaseControllerTest {
         Building building = buildingRepository.save(new Building("TORRE CENTRAL", "Av. Corrientes 1234"));
         tenantCounter++;
         Tenant tenant = tenantRepository.save(new Tenant(
-                "Inquilino" + tenantCounter, "Apellido" + tenantCounter,
-                "tenant" + tenantCounter + "@test.com", "11" + String.format("%08d", tenantCounter)));
+                "Inquilino" + tenantCounter, "Apellido" + tenantCounter, "tenant" + tenantCounter + "@test.com", "11" + String.format("%08d", tenantCounter)));
 
         Property property = new Property();
         property.setBuilding(building);
@@ -65,20 +64,14 @@ class BillingControllerTest extends BaseControllerTest {
     void test00_getBillable_propertyWithPendingContract_appearsInList() throws Exception {
         Property property = buildPropertyWithContract(RentalContract.RentalContractStatus.PENDING, new BigDecimal("150000"));
 
-        mockMvc.perform(get("/api/v1/properties/billable"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data[*].id", hasItem(property.getId().intValue())));
+        mockMvc.perform(get("/api/v1/properties/billable")).andExpect(status().isOk()).andExpect(jsonPath("$.status").value(200)).andExpect(jsonPath("$.data").isArray()).andExpect(jsonPath("$.data[*].id", hasItem(property.getId().intValue())));
     }
 
     @Test
     void test01_getBillable_propertyWithOverdueContract_appearsInList() throws Exception {
         Property property = buildPropertyWithContract(RentalContract.RentalContractStatus.OVERDUE, new BigDecimal("120000"));
 
-        mockMvc.perform(get("/api/v1/properties/billable"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[*].id", hasItem(property.getId().intValue())));
+        mockMvc.perform(get("/api/v1/properties/billable")).andExpect(status().isOk()).andExpect(jsonPath("$.data[*].id", hasItem(property.getId().intValue())));
     }
 
     @Test
@@ -86,10 +79,7 @@ class BillingControllerTest extends BaseControllerTest {
         Property paidProperty = buildPropertyWithContract(RentalContract.RentalContractStatus.PAID, new BigDecimal("100000"));
         Property pendingProperty = buildPropertyWithContract(RentalContract.RentalContractStatus.PENDING, new BigDecimal("100000"));
 
-        mockMvc.perform(get("/api/v1/properties/billable"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[*].id", not(hasItem(paidProperty.getId().intValue()))))
-                .andExpect(jsonPath("$.data[*].id", hasItem(pendingProperty.getId().intValue())));
+        mockMvc.perform(get("/api/v1/properties/billable")).andExpect(status().isOk()).andExpect(jsonPath("$.data[*].id", not(hasItem(paidProperty.getId().intValue())))).andExpect(jsonPath("$.data[*].id", hasItem(pendingProperty.getId().intValue())));
     }
 
     @Test
@@ -97,17 +87,7 @@ class BillingControllerTest extends BaseControllerTest {
         Property property = buildPropertyWithContract(RentalContract.RentalContractStatus.PENDING, new BigDecimal("180000"));
         String idFilter = "$.data[?(@.id == " + property.getId() + ")]";
 
-        mockMvc.perform(get("/api/v1/properties/billable"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath(idFilter + ".unit").exists())
-                .andExpect(jsonPath(idFilter + ".building").exists())
-                .andExpect(jsonPath(idFilter + ".address").exists())
-                .andExpect(jsonPath(idFilter + ".tenant").exists())
-                .andExpect(jsonPath(idFilter + ".previousStatus", hasItem("PENDING")))
-                .andExpect(jsonPath(idFilter + ".rentAmount", hasItem(180000)))
-                .andExpect(jsonPath(idFilter + ".totalAmount").exists())
-                .andExpect(jsonPath(idFilter + ".dueDate").exists())
-                .andExpect(jsonPath(idFilter + ".period").exists());
+        mockMvc.perform(get("/api/v1/properties/billable")).andExpect(status().isOk()).andExpect(jsonPath(idFilter + ".unit").exists()).andExpect(jsonPath(idFilter + ".building").exists()).andExpect(jsonPath(idFilter + ".address").exists()).andExpect(jsonPath(idFilter + ".tenant").exists()).andExpect(jsonPath(idFilter + ".previousStatus", hasItem("PENDING"))).andExpect(jsonPath(idFilter + ".rentAmount", hasItem(180000))).andExpect(jsonPath(idFilter + ".totalAmount").exists()).andExpect(jsonPath(idFilter + ".dueDate").exists()).andExpect(jsonPath(idFilter + ".period").exists());
     }
 
     @Test
@@ -115,10 +95,7 @@ class BillingControllerTest extends BaseControllerTest {
         Property paidProperty = buildPropertyWithContract(RentalContract.RentalContractStatus.PAID, new BigDecimal("100000"));
         buildPropertyWithContract(RentalContract.RentalContractStatus.PENDING, new BigDecimal("100000"));
 
-        mockMvc.perform(get("/api/v1/properties/billable"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data[*].id", not(hasItem(paidProperty.getId().intValue()))));
+        mockMvc.perform(get("/api/v1/properties/billable")).andExpect(status().isOk()).andExpect(jsonPath("$.data").isArray()).andExpect(jsonPath("$.data[*].id", not(hasItem(paidProperty.getId().intValue()))));
     }
 
     // ── POST /api/v1/billings ──────────────────────────────────────────────────
@@ -129,18 +106,10 @@ class BillingControllerTest extends BaseControllerTest {
 
         String body = "{\"propertyIds\":[" + property.getId() + "]}";
 
-        mockMvc.perform(post("/api/v1/billings")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.count").value(1));
+        mockMvc.perform(post("/api/v1/billings").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isCreated()).andExpect(jsonPath("$.data.count").value(1));
 
         // Verify new contract status is PENDING
-        RentalContract latest = rentalContractRepository
-                .findByPropertyId(property.getId())
-                .stream()
-                .max((a, b) -> a.getCreatedAt().compareTo(b.getCreatedAt()))
-                .orElseThrow();
+        RentalContract latest = rentalContractRepository.findByPropertyId(property.getId()).stream().max((a, b) -> a.getCreatedAt().compareTo(b.getCreatedAt())).orElseThrow();
         assert latest.getStatus() == RentalContract.RentalContractStatus.PENDING;
     }
 
@@ -150,17 +119,9 @@ class BillingControllerTest extends BaseControllerTest {
 
         String body = "{\"propertyIds\":[" + property.getId() + "]}";
 
-        mockMvc.perform(post("/api/v1/billings")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.count").value(1));
+        mockMvc.perform(post("/api/v1/billings").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isCreated()).andExpect(jsonPath("$.data.count").value(1));
 
-        RentalContract latest = rentalContractRepository
-                .findByPropertyId(property.getId())
-                .stream()
-                .max((a, b) -> a.getCreatedAt().compareTo(b.getCreatedAt()))
-                .orElseThrow();
+        RentalContract latest = rentalContractRepository.findByPropertyId(property.getId()).stream().max((a, b) -> a.getCreatedAt().compareTo(b.getCreatedAt())).orElseThrow();
         assert latest.getStatus() == RentalContract.RentalContractStatus.OVERDUE;
     }
 
@@ -170,17 +131,9 @@ class BillingControllerTest extends BaseControllerTest {
 
         String body = "{\"propertyIds\":[" + property.getId() + "]}";
 
-        mockMvc.perform(post("/api/v1/billings")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.count").value(1));
+        mockMvc.perform(post("/api/v1/billings").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isCreated()).andExpect(jsonPath("$.data.count").value(1));
 
-        RentalContract latest = rentalContractRepository
-                .findByPropertyId(property.getId())
-                .stream()
-                .max((a, b) -> a.getCreatedAt().compareTo(b.getCreatedAt()))
-                .orElseThrow();
+        RentalContract latest = rentalContractRepository.findByPropertyId(property.getId()).stream().max((a, b) -> a.getCreatedAt().compareTo(b.getCreatedAt())).orElseThrow();
         assert latest.getStatus() == RentalContract.RentalContractStatus.OVERDUE;
     }
 
@@ -192,22 +145,14 @@ class BillingControllerTest extends BaseControllerTest {
 
         String body = "{\"propertyIds\":[" + p1.getId() + "," + p2.getId() + "," + p3.getId() + "]}";
 
-        mockMvc.perform(post("/api/v1/billings")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.count").value(3));
+        mockMvc.perform(post("/api/v1/billings").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isCreated()).andExpect(jsonPath("$.data.count").value(3));
     }
 
     @Test
     void test09_createBillings_emptyList_returnsZeroCount() throws Exception {
         String body = "{\"propertyIds\":[]}";
 
-        mockMvc.perform(post("/api/v1/billings")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.count").value(0));
+        mockMvc.perform(post("/api/v1/billings").contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isCreated()).andExpect(jsonPath("$.data.count").value(0));
     }
 
     // ── GET /api/v1/billings/export ────────────────────────────────────────────
@@ -216,17 +161,10 @@ class BillingControllerTest extends BaseControllerTest {
     void test10_exportBillings_withExistingBillings_returnsExcel() throws Exception {
         Property property = buildPropertyWithContract(RentalContract.RentalContractStatus.PENDING, new BigDecimal("150000"));
         String body = "{\"propertyIds\":[" + property.getId() + "]}";
-        mockMvc.perform(post("/api/v1/billings")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body));
+        mockMvc.perform(post("/api/v1/billings").contentType(MediaType.APPLICATION_JSON).content(body));
 
-        mockMvc.perform(get("/api/v1/billings/export"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                .andExpect(header().string("Content-Disposition",
-                        containsString("facturas.xlsx")))
-                .andExpect(result -> {
+        mockMvc.perform(get("/api/v1/billings/export")).andExpect(status().isOk()).andExpect(content().contentType(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")).andExpect(header().string("Content-Disposition", containsString("facturas.xlsx"))).andExpect(result -> {
                     byte[] bytes = result.getResponse().getContentAsByteArray();
                     assert bytes.length > 0;
                 });
@@ -234,11 +172,8 @@ class BillingControllerTest extends BaseControllerTest {
 
     @Test
     void test11_exportBillings_noBillings_returnsEmptyExcel() throws Exception {
-        mockMvc.perform(get("/api/v1/billings/export"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(
-                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                .andExpect(result -> {
+        mockMvc.perform(get("/api/v1/billings/export")).andExpect(status().isOk()).andExpect(content().contentType(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")).andExpect(result -> {
                     byte[] bytes = result.getResponse().getContentAsByteArray();
                     assert bytes.length > 0;
                 });
@@ -270,14 +205,7 @@ class BillingControllerTest extends BaseControllerTest {
         Property property = buildPropertyWithContract(RentalContract.RentalContractStatus.PENDING, new BigDecimal("150000"));
         buildBillingDirectly(property, "2026-04", Billing.BillingStatus.PENDING);
 
-        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/billings"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data[?(@.period == '2026-04')].id").exists())
-                .andExpect(jsonPath("$.data[?(@.period == '2026-04')].status", hasItem("PENDING")))
-                .andExpect(jsonPath("$.data[?(@.period == '2026-04')].amount").exists())
-                .andExpect(jsonPath("$.data[?(@.period == '2026-04')].dueDate").exists());
+        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/billings")).andExpect(status().isOk()).andExpect(jsonPath("$.status").value(200)).andExpect(jsonPath("$.data").isArray()).andExpect(jsonPath("$.data[?(@.period == '2026-04')].id").exists()).andExpect(jsonPath("$.data[?(@.period == '2026-04')].status", hasItem("PENDING"))).andExpect(jsonPath("$.data[?(@.period == '2026-04')].amount").exists()).andExpect(jsonPath("$.data[?(@.period == '2026-04')].dueDate").exists());
     }
 
     @Test
@@ -286,22 +214,14 @@ class BillingControllerTest extends BaseControllerTest {
         buildBillingDirectly(property, "2026-03", Billing.BillingStatus.PENDING);
 
         // Register payment to mark billing as PAID
-        String paymentBody = "{\"amount\":150000,\"paymentMethod\":\"BANK_TRANSFER\","
-                + "\"paymentDate\":\"2026-04-01\",\"selectedPeriods\":[\"2026-03\"]}";
-        mockMvc.perform(post("/api/v1/properties/" + property.getId() + "/payments")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(paymentBody));
+        String paymentBody = "{\"amount\":150000,\"paymentMethod\":\"BANK_TRANSFER\"," + "\"paymentDate\":\"2026-04-01\",\"selectedPeriods\":[\"2026-03\"]}";
+        mockMvc.perform(post("/api/v1/properties/" + property.getId() + "/payments").contentType(MediaType.APPLICATION_JSON).content(paymentBody));
 
-        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/billings"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[?(@.period == '2026-03')].status", hasItem("PAID")))
-                .andExpect(jsonPath("$.data[?(@.period == '2026-03')].paymentDate", hasItem("2026-04-01")));
+        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/billings")).andExpect(status().isOk()).andExpect(jsonPath("$.data[?(@.period == '2026-03')].status", hasItem("PAID"))).andExpect(jsonPath("$.data[?(@.period == '2026-03')].paymentDate", hasItem("2026-04-01")));
     }
 
     @Test
     void test14_getBillingsByProperty_propertyNotFound_returnsNotFound() throws Exception {
-        mockMvc.perform(get("/api/v1/properties/99999/billings"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404));
+        mockMvc.perform(get("/api/v1/properties/99999/billings")).andExpect(status().isNotFound()).andExpect(jsonPath("$.status").value(404));
     }
 }

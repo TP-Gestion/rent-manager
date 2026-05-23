@@ -23,9 +23,7 @@ public class BillingResponse {
         this.status = billing.getStatus().name();
         this.amount = billing.getTotalAmount();
         this.dueDate = billing.getDueDate();
-        this.paymentDate = billing.getPayment() != null
-                ? billing.getPayment().getPaymentDate()
-                : null;
+        this.paymentDate = billing.getPayment() != null ? billing.getPayment().getPaymentDate() : null;
     }
 
     public Long getId() {

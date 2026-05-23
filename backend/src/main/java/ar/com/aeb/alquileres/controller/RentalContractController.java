@@ -5,7 +5,6 @@ import ar.com.aeb.alquileres.dto.rentalcontract.RentalContractRequest;
 import ar.com.aeb.alquileres.dto.rentalcontract.RentalContractResponse;
 import ar.com.aeb.alquileres.model.RentalContract;
 import ar.com.aeb.alquileres.service.RentalContractService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,8 +30,7 @@ public class RentalContractController {
      */
     @PutMapping(value = "/{id}", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<RentalContractResponse>> updateContract(
-            @PathVariable Long id,
-            @ModelAttribute RentalContractRequest request) {
+                                                                              @PathVariable Long id, @ModelAttribute RentalContractRequest request) {
         RentalContractResponse response = rentalContractService.update(id, request);
         return ResponseEntity.ok(ApiResponse.success("Rental contract updated successfully", response));
     }

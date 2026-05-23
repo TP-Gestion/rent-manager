@@ -1,6 +1,5 @@
 package ar.com.aeb.alquileres.controller;
 
-import ar.com.aeb.alquileres.dto.ApiResponse;
 import ar.com.aeb.alquileres.exception.payment.PaymentNotFoundException;
 import ar.com.aeb.alquileres.model.Payment;
 import ar.com.aeb.alquileres.repository.PaymentRepository;
@@ -30,16 +29,13 @@ public class InvoiceController {
 
     @GetMapping("/{paymentId}/receipt")
     public ResponseEntity<byte[]> getReceipt(@PathVariable Long paymentId) {
-        Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new PaymentNotFoundException(paymentId));
+        Payment payment = paymentRepository.findById(paymentId).orElseThrow(() -> new PaymentNotFoundException(paymentId));
 
         byte[] pdf = receiptService.generateReceipt(payment);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDisposition(ContentDisposition.attachment()
-                .filename("recibo-" + paymentId + ".pdf")
-                .build());
+        headers.setContentDisposition(ContentDisposition.attachment().filename("recibo-" + paymentId + ".pdf").build());
 
         return ResponseEntity.ok().headers(headers).body(pdf);
     }
@@ -52,9 +48,7 @@ public class InvoiceController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
-        headers.setContentDisposition(ContentDisposition.attachment()
-                .filename("pagos.xlsx")
-                .build());
+        headers.setContentDisposition(ContentDisposition.attachment().filename("pagos.xlsx").build());
 
         return ResponseEntity.ok().headers(headers).body(excel);
     }

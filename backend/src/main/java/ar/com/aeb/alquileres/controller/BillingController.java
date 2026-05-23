@@ -36,8 +36,7 @@ public class BillingController {
     @PostMapping("/billings")
     public ResponseEntity<ApiResponse<BillingCountResponse>> createBillings(@RequestBody BillingRequest request) {
         BillingCountResponse response = billingService.createBillings(request);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(201, "Billings created successfully", response));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(201, "Billings created successfully", response));
     }
 
     @GetMapping("/billings/export")
@@ -48,9 +47,7 @@ public class BillingController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
-        headers.setContentDisposition(ContentDisposition.attachment()
-                .filename("facturas.xlsx")
-                .build());
+        headers.setContentDisposition(ContentDisposition.attachment().filename("facturas.xlsx").build());
 
         return ResponseEntity.ok().headers(headers).body(excel);
     }

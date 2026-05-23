@@ -33,9 +33,7 @@ public class PaymentResponse {
         this.reference = payment.getReference();
         this.notes = payment.getNotes();
         this.hasReceipt = payment.getReceiptPath() != null;
-        this.periods = payment.getBillings().stream()
-                .map(Billing::getPeriod)
-                .toList();
+        this.periods = payment.getBillings().stream().map(Billing::getPeriod).toList();
         this.createdAt = payment.getCreatedAt();
     }
 

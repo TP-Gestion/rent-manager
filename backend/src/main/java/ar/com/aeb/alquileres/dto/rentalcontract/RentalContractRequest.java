@@ -1,28 +1,38 @@
 package ar.com.aeb.alquileres.dto.rentalcontract;
 
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import org.springframework.web.multipart.MultipartFile;
 
 public class RentalContractRequest {
+
+    private Long tenantId;
 
     @Positive(message = "The amount must be greater than 0")
     private BigDecimal amount;
 
     private LocalDate dueDate;
 
-    private org.springframework.web.multipart.MultipartFile contract;
+    private MultipartFile contract;
 
     public RentalContractRequest() {
     }
 
-    public RentalContractRequest(BigDecimal amount, LocalDate dueDate) {
+    public RentalContractRequest(Long tenantId, BigDecimal amount, LocalDate dueDate) {
+        this.tenantId = tenantId;
         this.amount = amount;
         this.dueDate = dueDate;
     }
 
-    // Getters and Setters
+    public Long getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(Long tenantId) {
+        this.tenantId = tenantId;
+    }
+
     public BigDecimal getAmount() {
         return amount;
     }
@@ -39,11 +49,11 @@ public class RentalContractRequest {
         this.dueDate = dueDate;
     }
 
-    public org.springframework.web.multipart.MultipartFile getContract() {
+    public MultipartFile getContract() {
         return contract;
     }
 
-    public void setContract(org.springframework.web.multipart.MultipartFile contract) {
+    public void setContract(MultipartFile contract) {
         this.contract = contract;
     }
 }

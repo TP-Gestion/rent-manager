@@ -183,8 +183,7 @@ public class PropertyController {
      */
     @PostMapping(value = "/{propertyId}/rental-contract", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<RentalContractResponse>> createPropertyRentalContract(
-            @PathVariable Long propertyId,
-            @ModelAttribute RentalContractRequest request) {
+                                                                                            @PathVariable Long propertyId, @ModelAttribute RentalContractRequest request) {
         RentalContractResponse response = rentalContractService.create(propertyId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(HttpStatus.CREATED.value(), "Rental contract created successfully", response));
     }
@@ -195,9 +194,6 @@ public class PropertyController {
     @GetMapping("/{propertyId}/rental-contract/{contractId}/file")
     public ResponseEntity<Resource> getContractFile(@PathVariable Long propertyId, @PathVariable Long contractId) {
         Resource resource = rentalContractService.getContractResource(contractId);
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_PDF)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
-                .body(resource);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"").body(resource);
     }
 }

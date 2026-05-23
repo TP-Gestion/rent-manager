@@ -14,14 +14,11 @@ import java.util.List;
 @Service
 public class ExcelExportService {
 
-    private static final String[] HEADERS = {
-        "ID", "Fecha de Pago", "Inquilino", "Propiedad", "Edificio",
-        "Períodos", "Monto", "Medio de Pago", "Referencia", "Observaciones"
+    private static final String[] HEADERS = {"ID", "Fecha de Pago", "Inquilino", "Propiedad", "Edificio", "Períodos", "Monto", "Medio de Pago", "Referencia", "Observaciones"
     };
 
     public byte[] exportPayments(List<Payment> payments) {
-        try (Workbook workbook = new XSSFWorkbook();
-             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+        try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
             Sheet sheet = workbook.createSheet("Pagos");
 
@@ -43,13 +40,8 @@ public class ExcelExportService {
             for (Payment payment : payments) {
                 Row row = sheet.createRow(rowNum++);
                 Tenant tenant = payment.getProperty().getTenant();
-                String tenantName = tenant != null
-                        ? tenant.getFirstName() + " " + tenant.getLastName()
-                        : "-";
-                String periods = payment.getBillings().stream()
-                        .map(ar.com.aeb.alquileres.model.Billing::getPeriod)
-                        .reduce((a, b) -> a + ", " + b)
-                        .orElse("");
+                String tenantName = tenant != null ? tenant.getFirstName() + " " + tenant.getLastName() : "-";
+                String periods = payment.getBillings().stream().map(ar.com.aeb.alquileres.model.Billing::getPeriod).reduce((a, b) -> a + ", " + b).orElse("");
 
                 row.createCell(0).setCellValue(payment.getId());
                 row.createCell(1).setCellValue(payment.getPaymentDate().toString());
@@ -74,15 +66,11 @@ public class ExcelExportService {
         }
     }
 
-    private static final String[] BILLING_HEADERS = {
-        "Propiedad", "Dirección", "Inquilino", "Correo", "Teléfono",
-        "Período", "Alquiler", "Expensas", "Gastos", "Total",
-        "Vencimiento", "Estado", "Notificado"
+    private static final String[] BILLING_HEADERS = {"Propiedad", "Dirección", "Inquilino", "Correo", "Teléfono", "Período", "Alquiler", "Expensas", "Gastos", "Total", "Vencimiento", "Estado", "Notificado"
     };
 
     public byte[] exportBillings(List<Billing> billings) {
-        try (Workbook workbook = new XSSFWorkbook();
-             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+        try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
             Sheet sheet = workbook.createSheet("Facturas");
 
@@ -104,13 +92,11 @@ public class ExcelExportService {
             for (Billing billing : billings) {
                 Row row = sheet.createRow(rowNum++);
                 Tenant tenant = billing.getProperty().getTenant();
-                String propiedad = billing.getProperty().getBuilding().getName()
-                        + " " + billing.getProperty().getFloor();
+                String propiedad = billing.getProperty().getBuilding().getName() + " " + billing.getProperty().getFloor();
 
                 row.createCell(0).setCellValue(propiedad);
                 row.createCell(1).setCellValue(billing.getProperty().getBuilding().getAddress());
-                row.createCell(2).setCellValue(tenant != null
-                        ? tenant.getFirstName() + " " + tenant.getLastName() : "");
+                row.createCell(2).setCellValue(tenant != null ? tenant.getFirstName() + " " + tenant.getLastName() : "");
                 row.createCell(3).setCellValue(tenant != null ? tenant.getEmail() : "");
                 row.createCell(4).setCellValue(tenant != null ? tenant.getPhone() : "");
                 row.createCell(5).setCellValue(billing.getPeriod());

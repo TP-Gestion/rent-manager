@@ -44,13 +44,11 @@ public class PaymentService {
     private String uploadPath;
 
     public PaymentResponse registerPayment(Long propertyId, PaymentRequest request, MultipartFile receipt) {
-        Property property = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new PropertyNotFoundException(propertyId));
+        Property property = propertyRepository.findById(propertyId).orElseThrow(() -> new PropertyNotFoundException(propertyId));
 
         List<Billing> billingsToPay = new ArrayList<>();
         for (String period : request.getSelectedPeriods()) {
-            Billing billing = billingRepository.findByPropertyIdAndPeriod(propertyId, period)
-                    .orElseThrow(() -> new BillingPeriodNotFoundException(propertyId, period));
+            Billing billing = billingRepository.findByPropertyIdAndPeriod(propertyId, period).orElseThrow(() -> new BillingPeriodNotFoundException(propertyId, period));
 
             if (billing.getStatus() == Billing.BillingStatus.PAID) {
                 throw new BillingAlreadyPaidException(period);
@@ -88,8 +86,7 @@ public class PaymentService {
 
     @Transactional(readOnly = true)
     public Resource getReceipt(Long paymentId) {
-        Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new ar.com.aeb.alquileres.exception.payment.PaymentNotFoundException(paymentId));
+        Payment payment = paymentRepository.findById(paymentId).orElseThrow(() -> new ar.com.aeb.alquileres.exception.payment.PaymentNotFoundException(paymentId));
 
         if (payment.getReceiptPath() == null) {
             throw new RuntimeException("No receipt found for this payment");
@@ -114,15 +111,11 @@ public class PaymentService {
         if (!propertyRepository.existsById(propertyId)) {
             throw new PropertyNotFoundException(propertyId);
         }
-        return paymentRepository.findByPropertyId(propertyId).stream()
-                .map(PaymentResponse::new)
-                .toList();
+        return paymentRepository.findByPropertyId(propertyId).stream().map(PaymentResponse::new).toList();
     }
 
     @Transactional(readOnly = true)
     public List<PaymentResponse> getAllPayments() {
-        return paymentRepository.findAll().stream()
-                .map(PaymentResponse::new)
-                .toList();
+        return paymentRepository.findAll().stream().map(PaymentResponse::new).toList();
     }
 }
