@@ -67,10 +67,16 @@ public class BillingService {
         int count = 0;
         for (Long propertyId : request.getPropertyIds()) {
             Optional<Property> propertyOpt = propertyRepository.findById(propertyId);
-            if (propertyOpt.isEmpty()) continue;
+            if (propertyOpt.isEmpty()) {
+                Property property = propertyRepository.findById(propertyId)
+                        .orElseThrow(() -> new IllegalArgumentException("Property with ID " + propertyId + " not found"));
+            };
 
             Optional<RentalContract> contractOpt = getLatestContract(propertyId);
-            if (contractOpt.isEmpty()) continue;
+            if (contractOpt.isEmpty()) {
+                RentalContract contract = getLatestContract(propertyId)
+                        .orElseThrow(() -> new IllegalArgumentException("No active rental contract found for property ID " + propertyId));
+            };
 
             Property property = propertyOpt.get();
             RentalContract contract = contractOpt.get();
@@ -105,6 +111,10 @@ public class BillingService {
             Tenant tenant = contract.getTenant();
             byte[] pdf = generatePdf(tenant, property, contract);
             emailService.sendBillingEmail(tenant.getEmail(), pdf);
+
+            // mark as notified
+            billing.setNotified(true);
+            billingRepository.save(billing);
 
             count++;
         }
