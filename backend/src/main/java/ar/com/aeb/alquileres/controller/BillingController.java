@@ -51,4 +51,10 @@ public class BillingController {
 
         return ResponseEntity.ok().headers(headers).body(excel);
     }
+
+    @PostMapping("/billings/notify-expiring")
+    public ResponseEntity<ApiResponse<Integer>> notifyExpiringContracts() {
+        int count = billingService.notifyExpiringContractsManual();
+        return ResponseEntity.ok(ApiResponse.success("Notifications sent", count));
+    }
 }

@@ -27,6 +27,9 @@ import ar.com.aeb.alquileres.model.RentalContract;
 import ar.com.aeb.alquileres.model.Property;
 import ar.com.aeb.alquileres.model.Tenant;
 
+import org.springframework.scheduling.annotation.Scheduled;
+
+import java.time.LocalDate;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.time.YearMonth;
@@ -204,5 +207,29 @@ public class BillingService {
 
         document.close();
         return baos.toByteArray();
+    }
+
+    public int notifyExpiringContractsManual() {
+        LocalDate today = LocalDate.now();
+        LocalDate targetDate = today.plusDays(7);
+
+        List<RentalContract> contracts = rentalContractRepository.findByDueDateBetween(today, targetDate);
+        int count = 0;
+
+        for (RentalContract contract : contracts) {
+            Tenant tenant = contract.getTenant();
+            Property property = contract.getProperty();
+
+            byte[] pdf = generatePdf(tenant, property, contract);
+            emailService.sendBillingEmail(tenant.getEmail(), pdf);
+
+            count++;
+        }
+        return count;
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void notifyExpiringContractsScheduled() {
+        notifyExpiringContractsManual();
     }
 }
