@@ -58,7 +58,10 @@ public class RentalContractService {
             throw new DuplicateActiveContractException("Property with ID " + propertyId + " already has a rental contract.");
         }
 
-        Tenant tenant = tenantRepository.findById(request.getTenantId()).orElseThrow(() -> new IllegalArgumentException("Tenant not found"));
+        Tenant tenant = property.getTenant();
+        if (tenant == null) {
+            throw new IllegalStateException("Property has no tenant assigned");
+        }
 
         RentalContract contract = new RentalContract(
                 property, request.getAmount(), request.getDueDate()

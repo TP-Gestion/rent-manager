@@ -7,8 +7,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class RentalContractRequest {
 
-    private Long tenantId;
-
     @Positive(message = "The amount must be greater than 0")
     private BigDecimal amount;
 
@@ -19,18 +17,9 @@ public class RentalContractRequest {
     public RentalContractRequest() {
     }
 
-    public RentalContractRequest(Long tenantId, BigDecimal amount, LocalDate dueDate) {
-        this.tenantId = tenantId;
+    public RentalContractRequest(BigDecimal amount, LocalDate dueDate) {
         this.amount = amount;
         this.dueDate = dueDate;
-    }
-
-    public Long getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(Long tenantId) {
-        this.tenantId = tenantId;
     }
 
     public BigDecimal getAmount() {
