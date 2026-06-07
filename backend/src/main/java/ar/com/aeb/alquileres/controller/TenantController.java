@@ -1,6 +1,7 @@
 package ar.com.aeb.alquileres.controller;
 
 import ar.com.aeb.alquileres.dto.ApiResponse;
+import ar.com.aeb.alquileres.dto.building.BuildingResponse;
 import ar.com.aeb.alquileres.dto.tenant.TenantRequest;
 import ar.com.aeb.alquileres.dto.tenant.TenantResponse;
 import ar.com.aeb.alquileres.service.TenantService;
@@ -42,6 +43,12 @@ public class TenantController {
     public ResponseEntity<ApiResponse<TenantResponse>> getTenantDetail(@PathVariable Long id) {
         TenantResponse tenant = tenantService.getDetail(id);
         return ResponseEntity.ok(ApiResponse.success("Success", tenant));
+    }
+
+    @GetMapping("/{id}/buildings")
+    public ResponseEntity<ApiResponse<List<BuildingResponse>>> getTenantBuildings(@PathVariable Long id) {
+        List<BuildingResponse> buildings = tenantService.getBuildings(id);
+        return ResponseEntity.ok(ApiResponse.success("Success", buildings));
     }
 
     @PutMapping("/{id}")
