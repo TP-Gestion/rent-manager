@@ -21,15 +21,23 @@ public class Expense extends BaseEntity {
     private List<PropertyExpense> propertyExpenses = new ArrayList<>();
 
     @NotNull
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ExpenseTypeConverter.class)
     @Column(name = "expense_type", nullable = false)
     private ExpenseType type;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "frequency")
+    private ExpenseFrequency frequency;
 
     @NotNull
     @Positive(message = "The amount must be greater than 0")
     @Column(nullable = false)
     private BigDecimal amount;
 
+    @Column
+    private String category;
+
+    // Se expone hacia el front como "concept"; reutilizamos esta columna.
     @Column
     private String description;
 
@@ -65,6 +73,22 @@ public class Expense extends BaseEntity {
         this.type = type;
     }
 
+    public ExpenseFrequency getFrequency() {
+        return frequency;
+    }
+
+    public void setFrequency(ExpenseFrequency frequency) {
+        this.frequency = frequency;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
     public BigDecimal getAmount() {
         return amount;
     }
@@ -90,6 +114,10 @@ public class Expense extends BaseEntity {
     }
 
     public enum ExpenseType {
-        MAINTENANCE, REPAIR, UTILITIES, TAXES, ADMINISTRATION
+        ORDINARIA, EXTRAORDINARIA
+    }
+
+    public enum ExpenseFrequency {
+        UNICA, MENSUAL
     }
 }
