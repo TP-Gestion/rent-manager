@@ -42,7 +42,7 @@ public class ExcelExportService {
             int rowNum = 1;
             for (Payment payment : payments) {
                 Row row = sheet.createRow(rowNum++);
-                Tenant tenant = payment.getProperty().getTenant();
+                Tenant tenant = payment.getTenant() != null ? payment.getTenant() : payment.getProperty().getTenant();
                 String tenantName = tenant != null
                         ? tenant.getFirstName() + " " + tenant.getLastName()
                         : "-";

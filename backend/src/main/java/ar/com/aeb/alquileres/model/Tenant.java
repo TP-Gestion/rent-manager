@@ -1,6 +1,8 @@
 package ar.com.aeb.alquileres.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Table(name = "TENANTS")
@@ -17,6 +19,13 @@ public class Tenant extends BaseEntity {
 
     @Column
     private String phone;
+
+    @Column(nullable = false)
+    @ColumnDefault("true")
+    private boolean active = true;
+
+    @Column
+    private LocalDate deactivatedAt;
 
     public Tenant() {
     }
@@ -59,5 +68,21 @@ public class Tenant extends BaseEntity {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public LocalDate getDeactivatedAt() {
+        return deactivatedAt;
+    }
+
+    public void setDeactivatedAt(LocalDate deactivatedAt) {
+        this.deactivatedAt = deactivatedAt;
     }
 }

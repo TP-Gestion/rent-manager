@@ -42,7 +42,7 @@ public class ReceiptService {
                     .setFont(regular).setFontSize(12)
                     .setTextAlignment(TextAlignment.RIGHT).setMarginBottom(20));
 
-            Tenant tenant = payment.getProperty().getTenant();
+            Tenant tenant = payment.getTenant() != null ? payment.getTenant() : payment.getProperty().getTenant();
             if (tenant != null) {
                 document.add(new Paragraph("Inquilino: " + tenant.getFirstName() + " " + tenant.getLastName())
                         .setFont(regular).setFontSize(12));

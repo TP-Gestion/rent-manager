@@ -18,6 +18,10 @@ public class Payment extends BaseEntity {
     @JoinColumn(name = "property_id", nullable = false)
     private Property property;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tenant_id")
+    private Tenant tenant;
+
     @NotNull
     @Column(name = "payment_date", nullable = false)
     private LocalDate paymentDate;
@@ -50,6 +54,14 @@ public class Payment extends BaseEntity {
 
     public void setProperty(Property property) {
         this.property = property;
+    }
+
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
     }
 
     public LocalDate getPaymentDate() {

@@ -48,6 +48,8 @@ public class PaymentService {
 
         Payment payment = new Payment();
         payment.setProperty(property);
+        // Snapshot the tenant who is paying so the history survives a later tenant deactivation
+        payment.setTenant(property.getTenant());
         payment.setPaymentDate(request.getPaymentDate());
         payment.setAmount(request.getAmount());
         payment.setPaymentMethod(request.getPaymentMethod());

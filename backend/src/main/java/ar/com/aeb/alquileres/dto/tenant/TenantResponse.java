@@ -1,6 +1,7 @@
 package ar.com.aeb.alquileres.dto.tenant;
 
 import ar.com.aeb.alquileres.model.Tenant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class TenantResponse {
@@ -10,6 +11,8 @@ public class TenantResponse {
     private String lastName;
     private String email;
     private String phone;
+    private boolean active;
+    private LocalDate deactivatedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -22,6 +25,8 @@ public class TenantResponse {
         this.lastName = tenant.getLastName();
         this.email = tenant.getEmail();
         this.phone = tenant.getPhone();
+        this.active = tenant.isActive();
+        this.deactivatedAt = tenant.getDeactivatedAt();
         this.createdAt = tenant.getCreatedAt();
         this.updatedAt = tenant.getUpdatedAt();
     }
@@ -65,6 +70,22 @@ public class TenantResponse {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public LocalDate getDeactivatedAt() {
+        return deactivatedAt;
+    }
+
+    public void setDeactivatedAt(LocalDate deactivatedAt) {
+        this.deactivatedAt = deactivatedAt;
     }
 
     public LocalDateTime getCreatedAt() {
