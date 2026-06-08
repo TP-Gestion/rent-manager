@@ -81,15 +81,8 @@ public class BillingService {
             }
             ;
 
-            Property property = propertyOpt.get();
-            RentalContract contract = contractOpt.get();
-            RentalContract.RentalContractStatus previousStatus = contract.getStatus();
-
-            contract.setStatus(newStatus);
-            rentalContractRepository.save(contract);
-
             BigDecimal expenses = getPendingExpenses(propertyId);
-            BigDecimal debtAmount = previousStatus == RentalContract.RentalContractStatus.PAID ? BigDecimal.ZERO : contract.getAmount();
+            BigDecimal debtAmount = contract.getStatus() == RentalContract.RentalContractStatus.PAID ? BigDecimal.ZERO : contract.getAmount();
             BigDecimal totalAmount = contract.getAmount().add(expenses);
             String period = YearMonth.from(contract.getDueDate()).toString();
 
@@ -105,7 +98,7 @@ public class BillingService {
             billing.setDebtAmount(debtAmount);
             billing.setTotalAmount(totalAmount);
             billing.setDueDate(contract.getDueDate());
-            billing.setStatus(newStatus == RentalContract.RentalContractStatus.PENDING ? Billing.BillingStatus.PENDING : Billing.BillingStatus.OVERDUE);
+            billing.setStatus(contract.getStatus() == RentalContract.RentalContractStatus.PENDING ? Billing.BillingStatus.PENDING : Billing.BillingStatus.OVERDUE);
             billingRepository.save(billing);
 
             Tenant tenant = contract.getTenant();
