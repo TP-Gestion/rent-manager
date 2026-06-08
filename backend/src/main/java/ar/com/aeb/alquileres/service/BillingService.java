@@ -95,6 +95,8 @@ public class BillingService {
 
             Billing billing = new Billing();
             billing.setProperty(property);
+            // Snapshot the tenant being billed so the history survives a later tenant change
+            billing.setTenant(property.getTenant());
             billing.setRentalContract(contract);
             billing.setPeriod(period);
             billing.setRentAmount(contract.getAmount());

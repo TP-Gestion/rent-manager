@@ -37,7 +37,7 @@ public class ReceiptService {
 
             document.add(new Paragraph("Fecha de pago: " + payment.getPaymentDate()).setFont(regular).setFontSize(12).setTextAlignment(TextAlignment.RIGHT).setMarginBottom(20));
 
-            Tenant tenant = payment.getProperty().getTenant();
+            Tenant tenant = payment.getTenant() != null ? payment.getTenant() : payment.getProperty().getTenant();
             if (tenant != null) {
                 document.add(new Paragraph("Inquilino: " + tenant.getFirstName() + " " + tenant.getLastName()).setFont(regular).setFontSize(12));
                 document.add(new Paragraph("Email: " + tenant.getEmail()).setFont(regular).setFontSize(12));

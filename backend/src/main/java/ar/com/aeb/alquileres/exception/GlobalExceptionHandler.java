@@ -11,6 +11,7 @@ import ar.com.aeb.alquileres.exception.payment.NoPendingContractException;
 import ar.com.aeb.alquileres.exception.payment.PaymentNotFoundException;
 import ar.com.aeb.alquileres.exception.property.PropertyNotFoundException;
 import ar.com.aeb.alquileres.exception.rentalContract.RentalContractNotFoundException;
+import ar.com.aeb.alquileres.exception.tenant.TenantAlreadyInactiveException;
 import ar.com.aeb.alquileres.exception.tenant.TenantNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -56,6 +57,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(TenantNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleTenantNotFound(TenantNotFoundException ex) {
+        return ResponseEntity.status(ex.getHttpStatus()).body(ApiResponse.error(ex.getHttpStatus().value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(TenantAlreadyInactiveException.class)
+    public ResponseEntity<ApiResponse<Void>> handleTenantAlreadyInactive(TenantAlreadyInactiveException ex) {
         return ResponseEntity.status(ex.getHttpStatus()).body(ApiResponse.error(ex.getHttpStatus().value(), ex.getMessage()));
     }
 
