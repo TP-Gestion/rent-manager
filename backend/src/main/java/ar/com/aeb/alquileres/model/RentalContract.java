@@ -28,6 +28,9 @@ public class RentalContract extends BaseEntity {
     @Column(nullable = false)
     private RentalContractStatus status = RentalContractStatus.PENDING;
 
+    @Column(name = "contract_path")
+    private String contractPath;
+
     public RentalContract() {
     }
 
@@ -68,6 +71,14 @@ public class RentalContract extends BaseEntity {
 
     public void setStatus(RentalContractStatus status) {
         this.status = status;
+    }
+
+    public String getContractPath() {
+        return contractPath;
+    }
+
+    public void setContractPath(String contractPath) {
+        this.contractPath = contractPath;
     }
 
     public enum RentalContractStatus {

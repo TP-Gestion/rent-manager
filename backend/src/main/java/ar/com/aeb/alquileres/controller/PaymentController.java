@@ -7,12 +7,17 @@ import ar.com.aeb.alquileres.dto.payment.PaymentResponse;
 import ar.com.aeb.alquileres.exception.property.PropertyNotFoundException;
 import ar.com.aeb.alquileres.repository.BillingRepository;
 import ar.com.aeb.alquileres.repository.PropertyRepository;
+import ar.com.aeb.alquileres.repository.PropertyRepository;
 import ar.com.aeb.alquileres.service.PaymentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -29,13 +34,22 @@ public class PaymentController {
     @Autowired
     private PropertyRepository propertyRepository;
 
-    @PostMapping("/payments")
+    @PostMapping(value = "/payments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<PaymentResponse>> registerPayment(
             @PathVariable Long propertyId,
-            @Valid @RequestBody PaymentRequest request) {
-        PaymentResponse response = paymentService.registerPayment(propertyId, request);
+            @Valid @ModelAttribute PaymentRequest request) {
+        PaymentResponse response = paymentService.registerPayment(propertyId, request, request.getReceipt());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(201, "Payment registered successfully", response));
+    }
+
+    @GetMapping("/payments/{paymentId}/receipt")
+    public ResponseEntity<Resource> getReceipt(@PathVariable Long propertyId, @PathVariable Long paymentId) {
+        Resource resource = paymentService.getReceipt(paymentId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
+                .body(resource);
     }
 
     @GetMapping("/payments")

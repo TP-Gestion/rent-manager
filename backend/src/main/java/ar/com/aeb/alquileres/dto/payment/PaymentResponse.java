@@ -17,6 +17,7 @@ public class PaymentResponse {
     private String paymentMethod;
     private String reference;
     private String notes;
+    private boolean hasReceipt;
     private List<String> periods;
     private LocalDateTime createdAt;
 
@@ -31,6 +32,7 @@ public class PaymentResponse {
         this.paymentMethod = payment.getPaymentMethod().toString();
         this.reference = payment.getReference();
         this.notes = payment.getNotes();
+        this.hasReceipt = payment.getReceiptPath() != null;
         this.periods = payment.getBillings().stream()
                 .map(Billing::getPeriod)
                 .toList();
@@ -91,6 +93,14 @@ public class PaymentResponse {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public boolean isHasReceipt() {
+        return hasReceipt;
+    }
+
+    public void setHasReceipt(boolean hasReceipt) {
+        this.hasReceipt = hasReceipt;
     }
 
     public List<String> getPeriods() {

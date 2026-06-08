@@ -1,5 +1,6 @@
 package ar.com.aeb.alquileres.service;
 
+import ar.com.aeb.alquileres.dto.building.BuildingResponse;
 import ar.com.aeb.alquileres.dto.tenant.TenantRequest;
 import ar.com.aeb.alquileres.dto.tenant.TenantResponse;
 import ar.com.aeb.alquileres.exception.tenant.DuplicateEmailException;
@@ -8,6 +9,7 @@ import ar.com.aeb.alquileres.exception.tenant.TenantAlreadyInactiveException;
 import ar.com.aeb.alquileres.exception.tenant.TenantNotFoundException;
 import ar.com.aeb.alquileres.model.Property;
 import ar.com.aeb.alquileres.model.Tenant;
+import ar.com.aeb.alquileres.repository.BuildingRepository;
 import ar.com.aeb.alquileres.repository.PropertyRepository;
 import ar.com.aeb.alquileres.repository.TenantRepository;
 import java.time.LocalDate;
@@ -26,6 +28,9 @@ public class TenantService {
 
     @Autowired
     private PropertyRepository propertyRepository;
+
+    @Autowired
+    private BuildingRepository buildingRepository;
 
     /**
      * Create a new tenant entity
@@ -94,6 +99,19 @@ public class TenantService {
 
         Tenant updated = tenantRepository.save(tenant);
         return new TenantResponse(updated);
+    }
+
+    /**
+     * Get all buildings where the tenant has at least one property
+     */
+    @Transactional(readOnly = true)
+    public List<BuildingResponse> getBuildings(Long id) {
+        if (!tenantRepository.existsById(id)) {
+            throw new TenantNotFoundException(id);
+        }
+        return buildingRepository.findDistinctByTenantId(id).stream()
+                .map(BuildingResponse::new)
+                .collect(Collectors.toList());
     }
 
     /**

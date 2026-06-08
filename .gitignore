@@ -11,3 +11,5 @@ backend/gradlew.bat
 *.env
 backend/.env.properties
 CLAUDE.md
+uploads/
+**/uploads/

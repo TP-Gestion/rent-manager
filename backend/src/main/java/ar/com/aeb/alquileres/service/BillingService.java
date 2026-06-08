@@ -73,7 +73,7 @@ public class BillingService {
                     ? BigDecimal.ZERO
                     : contract.getAmount();
             BigDecimal totalAmount = contract.getAmount().add(expenses);
-            String period = YearMonth.now().toString();
+            String period = YearMonth.from(contract.getDueDate()).toString();
 
             Billing billing = new Billing();
             billing.setProperty(property);

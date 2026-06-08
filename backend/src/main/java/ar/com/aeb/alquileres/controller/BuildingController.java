@@ -3,8 +3,9 @@ package ar.com.aeb.alquileres.controller;
 import ar.com.aeb.alquileres.dto.ApiResponse;
 import ar.com.aeb.alquileres.dto.building.BuildingRequest;
 import ar.com.aeb.alquileres.dto.building.BuildingResponse;
-import ar.com.aeb.alquileres.dto.expense.ExpenseRequest;
-import ar.com.aeb.alquileres.dto.expense.ExpenseResponse;
+import ar.com.aeb.alquileres.dto.expense.BuildingExpenseResponse;
+import ar.com.aeb.alquileres.dto.expense.CreateBuildingExpenseRequest;
+import ar.com.aeb.alquileres.dto.expense.UpdateBuildingExpenseRequest;
 import ar.com.aeb.alquileres.service.BuildingService;
 import ar.com.aeb.alquileres.service.ExpenseService;
 import jakarta.validation.Valid;
@@ -82,8 +83,8 @@ public class BuildingController {
      * READ - Get expenses for a building
      */
     @GetMapping("/{buildingId}/expenses")
-    public ResponseEntity<ApiResponse<List<ExpenseResponse>>> getBuildingExpenses(@PathVariable Long buildingId) {
-        List<ExpenseResponse> response = expenseService.getExpenses(null, buildingId);
+    public ResponseEntity<ApiResponse<List<BuildingExpenseResponse>>> getBuildingExpenses(@PathVariable Long buildingId) {
+        List<BuildingExpenseResponse> response = expenseService.getBuildingExpenseItems(buildingId);
         return ResponseEntity.ok(ApiResponse.success("Success", response));
     }
 
@@ -91,8 +92,17 @@ public class BuildingController {
      * CREATE - Add a new expense to a building
      */
     @PostMapping("/{buildingId}/expenses")
-    public ResponseEntity<ApiResponse<List<ExpenseResponse>>> createBuildingExpense(@PathVariable Long buildingId, @Valid @RequestBody ExpenseRequest request) {
-        List<ExpenseResponse> response = expenseService.createBuildingExpense(buildingId, request);
+    public ResponseEntity<ApiResponse<BuildingExpenseResponse>> createBuildingExpense(@PathVariable Long buildingId, @Valid @RequestBody CreateBuildingExpenseRequest request) {
+        BuildingExpenseResponse response = expenseService.createBuildingExpense(buildingId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(HttpStatus.CREATED.value(), "Expense created successfully", response));
+    }
+
+    /**
+     * UPDATE - Update the amount of a building expense
+     */
+    @PatchMapping("/{buildingId}/expenses/{expenseId}")
+    public ResponseEntity<ApiResponse<BuildingExpenseResponse>> updateBuildingExpense(@PathVariable Long buildingId, @PathVariable Long expenseId, @Valid @RequestBody UpdateBuildingExpenseRequest request) {
+        BuildingExpenseResponse response = expenseService.updateBuildingExpense(buildingId, expenseId, request.getAmount());
+        return ResponseEntity.ok(ApiResponse.success("Expense updated successfully", response));
     }
 }

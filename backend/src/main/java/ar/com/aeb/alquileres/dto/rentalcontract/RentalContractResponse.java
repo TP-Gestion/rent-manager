@@ -12,6 +12,7 @@ public class RentalContractResponse {
     private BigDecimal amount;
     private LocalDate dueDate;
     private String status;
+    private boolean hasContract;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -24,6 +25,7 @@ public class RentalContractResponse {
         this.amount = contract.getAmount();
         this.dueDate = contract.getDueDate();
         this.status = contract.getStatus().toString();
+        this.hasContract = contract.getContractPath() != null;
         this.createdAt = contract.getCreatedAt();
         this.updatedAt = contract.getUpdatedAt();
     }
@@ -67,6 +69,14 @@ public class RentalContractResponse {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public boolean isHasContract() {
+        return hasContract;
+    }
+
+    public void setHasContract(boolean hasContract) {
+        this.hasContract = hasContract;
     }
 
     public LocalDateTime getCreatedAt() {

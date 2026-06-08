@@ -7,12 +7,12 @@ import java.time.LocalDate;
 
 public class RentalContractRequest {
 
-    @NotNull(message = "Amount cannot be null")
     @Positive(message = "The amount must be greater than 0")
     private BigDecimal amount;
 
-    @NotNull(message = "Due date cannot be null")
     private LocalDate dueDate;
+
+    private org.springframework.web.multipart.MultipartFile contract;
 
     public RentalContractRequest() {
     }
@@ -37,5 +37,13 @@ public class RentalContractRequest {
 
     public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
+    }
+
+    public org.springframework.web.multipart.MultipartFile getContract() {
+        return contract;
+    }
+
+    public void setContract(org.springframework.web.multipart.MultipartFile contract) {
+        this.contract = contract;
     }
 }
