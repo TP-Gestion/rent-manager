@@ -4,6 +4,7 @@ import ar.com.aeb.alquileres.dto.ApiResponse;
 import ar.com.aeb.alquileres.dto.building.BuildingResponse;
 import ar.com.aeb.alquileres.dto.tenant.TenantRequest;
 import ar.com.aeb.alquileres.dto.tenant.TenantResponse;
+import ar.com.aeb.alquileres.dto.tenant.TenantSummaryResponse;
 import ar.com.aeb.alquileres.service.TenantService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -50,6 +51,12 @@ public class TenantController {
     public ResponseEntity<ApiResponse<List<BuildingResponse>>> getTenantBuildings(@PathVariable Long id) {
         List<BuildingResponse> buildings = tenantService.getBuildings(id);
         return ResponseEntity.ok(ApiResponse.success("Success", buildings));
+    }
+
+    @GetMapping("/{id}/summary")
+    public ResponseEntity<ApiResponse<TenantSummaryResponse>> getTenantSummary(@PathVariable Long id) {
+        TenantSummaryResponse summary = tenantService.getSummary(id);
+        return ResponseEntity.ok(ApiResponse.success("Success", summary));
     }
 
     @PutMapping("/{id}")
