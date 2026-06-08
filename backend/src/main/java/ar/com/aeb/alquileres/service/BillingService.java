@@ -71,24 +71,19 @@ public class BillingService {
         for (Long propertyId : request.getPropertyIds()) {
             Optional<Property> propertyOpt = propertyRepository.findById(propertyId);
             if (propertyOpt.isEmpty()) {
-                Property property = propertyRepository.findById(propertyId)
-                        .orElseThrow(() -> new IllegalArgumentException("Property with ID " + propertyId + " not found"));
-            };
+                Property property = propertyRepository.findById(propertyId).orElseThrow(() -> new IllegalArgumentException("Property with ID " + propertyId + " not found"));
+            }
+            ;
 
             Optional<RentalContract> contractOpt = getLatestContract(propertyId);
             if (contractOpt.isEmpty()) {
-                RentalContract contract = getLatestContract(propertyId)
-                        .orElseThrow(() -> new IllegalArgumentException("No active rental contract found for property ID " + propertyId));
-            };
+                RentalContract contract = getLatestContract(propertyId).orElseThrow(() -> new IllegalArgumentException("No active rental contract found for property ID " + propertyId));
+            }
+            ;
 
             Property property = propertyOpt.get();
             RentalContract contract = contractOpt.get();
             RentalContract.RentalContractStatus previousStatus = contract.getStatus();
-
-            RentalContract.RentalContractStatus newStatus = switch (previousStatus) {
-                case PAID -> RentalContract.RentalContractStatus.PENDING;
-                case PENDING, OVERDUE -> RentalContract.RentalContractStatus.OVERDUE;
-            };
 
             contract.setStatus(newStatus);
             rentalContractRepository.save(contract);
