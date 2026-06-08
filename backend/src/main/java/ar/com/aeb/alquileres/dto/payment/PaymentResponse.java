@@ -2,6 +2,7 @@ package ar.com.aeb.alquileres.dto.payment;
 
 import ar.com.aeb.alquileres.model.Billing;
 import ar.com.aeb.alquileres.model.Payment;
+import ar.com.aeb.alquileres.model.Tenant;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,6 +20,7 @@ public class PaymentResponse {
     private String notes;
     private boolean hasReceipt;
     private List<String> periods;
+    private TenantInfo tenant;
     private LocalDateTime createdAt;
 
     public PaymentResponse() {
@@ -36,7 +38,42 @@ public class PaymentResponse {
         this.periods = payment.getBillings().stream()
                 .map(Billing::getPeriod)
                 .toList();
+        // Historical tenant snapshot: the tenant who made the payment, independent of the
+        // current Property-Tenant relation. Null for payments registered before this feature.
+        this.tenant = payment.getTenant() != null ? new TenantInfo(payment.getTenant()) : null;
         this.createdAt = payment.getCreatedAt();
+    }
+
+    /**
+     * Minimal historical view of the tenant who made the payment.
+     */
+    public static class TenantInfo {
+        private String firstName;
+        private String lastName;
+
+        public TenantInfo() {
+        }
+
+        public TenantInfo(Tenant tenant) {
+            this.firstName = tenant.getFirstName();
+            this.lastName = tenant.getLastName();
+        }
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public void setFirstName(String firstName) {
+            this.firstName = firstName;
+        }
+
+        public String getLastName() {
+            return lastName;
+        }
+
+        public void setLastName(String lastName) {
+            this.lastName = lastName;
+        }
     }
 
     public Long getId() {
@@ -109,6 +146,14 @@ public class PaymentResponse {
 
     public void setPeriods(List<String> periods) {
         this.periods = periods;
+    }
+
+    public TenantInfo getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(TenantInfo tenant) {
+        this.tenant = tenant;
     }
 
     public LocalDateTime getCreatedAt() {

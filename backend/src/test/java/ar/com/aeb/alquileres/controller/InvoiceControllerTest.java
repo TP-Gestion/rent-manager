@@ -64,12 +64,11 @@ class InvoiceControllerTest extends BaseControllerTest {
         billing.setStatus(Billing.BillingStatus.PENDING);
         billingRepository.save(billing);
 
-        String body = "{\"amount\":" + amount.toPlainString() + ",\"paymentMethod\":\"BANK_TRANSFER\","
-                + "\"paymentDate\":\"" + LocalDate.now() + "\",\"selectedPeriods\":[\"2026-05\"]}";
-
-        String response = mockMvc.perform(post("/api/v1/properties/" + property.getId() + "/payments")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body))
+        String response = mockMvc.perform(multipart("/api/v1/properties/" + property.getId() + "/payments")
+                .param("amount", amount.toPlainString())
+                .param("paymentMethod", "BANK_TRANSFER")
+                .param("paymentDate", LocalDate.now().toString())
+                .param("selectedPeriods", "2026-05"))
                 .andReturn().getResponse().getContentAsString();
 
         return ((Number) JsonPath.read(response, "$.data.id")).longValue();

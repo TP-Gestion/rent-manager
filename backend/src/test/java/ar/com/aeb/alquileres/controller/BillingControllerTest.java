@@ -286,11 +286,11 @@ class BillingControllerTest extends BaseControllerTest {
         buildBillingDirectly(property, "2026-03", Billing.BillingStatus.PENDING);
 
         // Register payment to mark billing as PAID
-        String paymentBody = "{\"amount\":150000,\"paymentMethod\":\"BANK_TRANSFER\","
-                + "\"paymentDate\":\"2026-04-01\",\"selectedPeriods\":[\"2026-03\"]}";
-        mockMvc.perform(post("/api/v1/properties/" + property.getId() + "/payments")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(paymentBody));
+        mockMvc.perform(multipart("/api/v1/properties/" + property.getId() + "/payments")
+                .param("amount", "150000")
+                .param("paymentMethod", "BANK_TRANSFER")
+                .param("paymentDate", "2026-04-01")
+                .param("selectedPeriods", "2026-03"));
 
         mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/billings"))
                 .andExpect(status().isOk())
