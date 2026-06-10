@@ -84,14 +84,11 @@ public class ExpenseService {
         if (!buildingRepository.existsById(buildingId)) {
             throw new BuildingNotFoundException(buildingId);
         }
-        return expenseRepository.findByBuildingId(buildingId).stream()
-                .map(BuildingExpenseResponse::new)
-                .collect(Collectors.toList());
+        return expenseRepository.findByBuildingId(buildingId).stream().map(BuildingExpenseResponse::new).collect(Collectors.toList());
     }
 
     public BuildingExpenseResponse createBuildingExpense(Long buildingId, CreateBuildingExpenseRequest request) {
-        Building building = buildingRepository.findById(buildingId)
-                .orElseThrow(() -> new BuildingNotFoundException(buildingId));
+        Building building = buildingRepository.findById(buildingId).orElseThrow(() -> new BuildingNotFoundException(buildingId));
 
         Expense expense = new Expense();
         expense.setBuilding(building);
@@ -109,8 +106,7 @@ public class ExpenseService {
     }
 
     public BuildingExpenseResponse updateBuildingExpense(Long buildingId, Long expenseId, BigDecimal newAmount) {
-        Expense expense = expenseRepository.findById(expenseId)
-                .orElseThrow(() -> new ExpenseNotFoundException(expenseId));
+        Expense expense = expenseRepository.findById(expenseId).orElseThrow(() -> new ExpenseNotFoundException(expenseId));
 
         if (expense.getBuilding() == null || !expense.getBuilding().getId().equals(buildingId)) {
             throw new ExpenseNotFoundException(expenseId);

@@ -35,9 +35,7 @@ public class PaymentResponse {
         this.reference = payment.getReference();
         this.notes = payment.getNotes();
         this.hasReceipt = payment.getReceiptPath() != null;
-        this.periods = payment.getBillings().stream()
-                .map(Billing::getPeriod)
-                .toList();
+        this.periods = payment.getBillings().stream().map(Billing::getPeriod).toList();
         // Historical tenant snapshot: the tenant who made the payment, independent of the
         // current Property-Tenant relation. Null for payments registered before this feature.
         this.tenant = payment.getTenant() != null ? new TenantInfo(payment.getTenant()) : null;

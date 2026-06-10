@@ -81,6 +81,9 @@ public class BillingService {
             }
             ;
 
+            Property property = propertyOpt.get();
+            RentalContract contract = contractOpt.get();
+
             BigDecimal expenses = getPendingExpenses(propertyId);
             BigDecimal debtAmount = contract.getStatus() == RentalContract.RentalContractStatus.PAID ? BigDecimal.ZERO : contract.getAmount();
             BigDecimal totalAmount = contract.getAmount().add(expenses);

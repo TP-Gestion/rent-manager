@@ -44,9 +44,7 @@ public class BuildingExpenseResponse {
         if (expense.getType() == null) {
             return null;
         }
-        return expense.getType() == ExpenseType.ORDINARIA
-                ? ExpenseFrequency.MENSUAL
-                : ExpenseFrequency.UNICA;
+        return expense.getType() == ExpenseType.ORDINARIA ? ExpenseFrequency.MENSUAL : ExpenseFrequency.UNICA;
     }
 
     public Long getId() {
