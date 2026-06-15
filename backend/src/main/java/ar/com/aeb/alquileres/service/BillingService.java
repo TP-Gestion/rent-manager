@@ -80,12 +80,20 @@ public class BillingService {
                 RentalContract contract = getLatestContract(propertyId).orElseThrow(() -> new IllegalArgumentException("No active rental contract found for property ID " + propertyId));
             }
             ;
-
             Property property = propertyOpt.get();
             RentalContract contract = contractOpt.get();
+            RentalContract.RentalContractStatus previousStatus = contract.getStatus();
+
+            RentalContract.RentalContractStatus newStatus = switch (previousStatus) {
+                case PAID -> RentalContract.RentalContractStatus.PENDING;
+                case PENDING, OVERDUE -> RentalContract.RentalContractStatus.OVERDUE;
+            };
+
+            contract.setStatus(newStatus);
+            rentalContractRepository.save(contract);
 
             BigDecimal expenses = getPendingExpenses(propertyId);
-            BigDecimal debtAmount = contract.getStatus() == RentalContract.RentalContractStatus.PAID ? BigDecimal.ZERO : contract.getAmount();
+            BigDecimal debtAmount = previousStatus == RentalContract.RentalContractStatus.PAID ? BigDecimal.ZERO : contract.getAmount();
             BigDecimal totalAmount = contract.getAmount().add(expenses);
             String period = YearMonth.from(contract.getDueDate()).toString();
 
@@ -101,15 +109,8 @@ public class BillingService {
             billing.setDebtAmount(debtAmount);
             billing.setTotalAmount(totalAmount);
             billing.setDueDate(contract.getDueDate());
+            billing.setStatus(newStatus == RentalContract.RentalContractStatus.PENDING ? Billing.BillingStatus.PENDING : Billing.BillingStatus.OVERDUE);
             billing.setStatus(contract.getStatus() == RentalContract.RentalContractStatus.PENDING ? Billing.BillingStatus.PENDING : Billing.BillingStatus.OVERDUE);
-            billingRepository.save(billing);
-
-            Tenant tenant = contract.getTenant();
-            byte[] pdf = generatePdf(tenant, property, contract);
-            emailService.sendBillingEmail(tenant.getEmail(), pdf);
-
-            // mark as notified
-            billing.setNotified(true);
             billingRepository.save(billing);
 
             count++;
@@ -210,11 +211,9 @@ public class BillingService {
         int count = 0;
 
         for (RentalContract contract : contracts) {
-            Tenant tenant = contract.getTenant();
-            Property property = contract.getProperty();
-
-            byte[] pdf = generatePdf(tenant, property, contract);
-            emailService.sendBillingEmail(tenant.getEmail(), pdf);
+            sendContractEmail(
+                    contract, contract.getProperty()
+            );
 
             count++;
         }
@@ -224,5 +223,43 @@ public class BillingService {
     @Scheduled(cron = "0 0 0 * * ?")
     public void notifyExpiringContractsScheduled() {
         notifyExpiringContractsManual();
+    }
+
+    public BillingCountResponse sendBillingEmails(BillingRequest request) {
+
+        if (request.getPropertyIds() == null || request.getPropertyIds().isEmpty()) {
+            return new BillingCountResponse(0);
+        }
+
+        int count = 0;
+
+        for (Long propertyId : request.getPropertyIds()) {
+
+            Property property = propertyRepository.findById(propertyId).orElseThrow(() -> new IllegalArgumentException(
+                    "Property with ID " + propertyId + " not found"));
+
+            RentalContract contract = getLatestContract(propertyId).orElseThrow(() -> new IllegalArgumentException(
+                    "No active rental contract found for property ID " + propertyId));
+
+            sendContractEmail(contract, property);
+
+            count++;
+        }
+
+        return new BillingCountResponse(count);
+    }
+
+    private void sendContractEmail(
+                                   RentalContract contract, Property property) {
+
+        Tenant tenant = contract.getTenant();
+
+        byte[] pdf = generatePdf(
+                tenant, property, contract
+        );
+
+        emailService.sendBillingEmail(
+                tenant.getEmail(), pdf
+        );
     }
 }
