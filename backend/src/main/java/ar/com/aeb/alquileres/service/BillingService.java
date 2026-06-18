@@ -27,7 +27,6 @@ import ar.com.aeb.alquileres.model.RentalContract;
 import ar.com.aeb.alquileres.model.Property;
 import ar.com.aeb.alquileres.model.Tenant;
 
-import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.LocalDate;
 import java.io.ByteArrayOutputStream;
@@ -62,61 +61,30 @@ public class BillingService {
         return propertyRepository.findAll().stream().filter(p -> getLatestContract(p.getId()).map(c -> c.getStatus() == RentalContract.RentalContractStatus.PENDING || c.getStatus() == RentalContract.RentalContractStatus.OVERDUE).orElse(false)).map(this::buildBillableResponse).toList();
     }
 
-    public BillingCountResponse createBillings(BillingRequest request) {
-        if (request.getPropertyIds() == null || request.getPropertyIds().isEmpty()) {
-            return new BillingCountResponse(0);
-        }
+    public Billing createBillingForProperty(Long propertyId) {
+        Property property = propertyRepository.findById(propertyId).orElseThrow(() -> new IllegalArgumentException("Property with ID " + propertyId + " not found"));
 
-        int count = 0;
-        for (Long propertyId : request.getPropertyIds()) {
-            Optional<Property> propertyOpt = propertyRepository.findById(propertyId);
-            if (propertyOpt.isEmpty()) {
-                Property property = propertyRepository.findById(propertyId).orElseThrow(() -> new IllegalArgumentException("Property with ID " + propertyId + " not found"));
-            }
-            ;
+        RentalContract contract = getLatestContract(propertyId).orElseThrow(() -> new IllegalArgumentException("No active rental contract found for property ID " + propertyId));
 
-            Optional<RentalContract> contractOpt = getLatestContract(propertyId);
-            if (contractOpt.isEmpty()) {
-                RentalContract contract = getLatestContract(propertyId).orElseThrow(() -> new IllegalArgumentException("No active rental contract found for property ID " + propertyId));
-            }
-            ;
-            Property property = propertyOpt.get();
-            RentalContract contract = contractOpt.get();
-            RentalContract.RentalContractStatus previousStatus = contract.getStatus();
+        BigDecimal expenses = getPendingExpenses(propertyId);
+        BigDecimal debtAmount = contract.getStatus() == RentalContract.RentalContractStatus.PAID ? BigDecimal.ZERO : contract.getAmount();
+        BigDecimal totalAmount = contract.getAmount().add(expenses);
+        String period = YearMonth.from(contract.getDueDate()).toString();
 
-            RentalContract.RentalContractStatus newStatus = switch (previousStatus) {
-                case PAID -> RentalContract.RentalContractStatus.PENDING;
-                case PENDING, OVERDUE -> RentalContract.RentalContractStatus.OVERDUE;
-            };
+        Billing billing = new Billing();
+        billing.setProperty(property);
+        billing.setTenant(property.getTenant()); // snapshot del tenant
+        billing.setRentalContract(contract);
+        billing.setPeriod(period);
+        billing.setRentAmount(contract.getAmount());
+        billing.setExpenses(expenses);
+        billing.setAdditionalCharges(BigDecimal.ZERO);
+        billing.setDebtAmount(debtAmount);
+        billing.setTotalAmount(totalAmount);
+        billing.setDueDate(contract.getDueDate());
+        billing.setStatus(Billing.BillingStatus.PENDING);
 
-            contract.setStatus(newStatus);
-            rentalContractRepository.save(contract);
-
-            BigDecimal expenses = getPendingExpenses(propertyId);
-            BigDecimal debtAmount = previousStatus == RentalContract.RentalContractStatus.PAID ? BigDecimal.ZERO : contract.getAmount();
-            BigDecimal totalAmount = contract.getAmount().add(expenses);
-            String period = YearMonth.from(contract.getDueDate()).toString();
-
-            Billing billing = new Billing();
-            billing.setProperty(property);
-            // Snapshot the tenant being billed so the history survives a later tenant change
-            billing.setTenant(property.getTenant());
-            billing.setRentalContract(contract);
-            billing.setPeriod(period);
-            billing.setRentAmount(contract.getAmount());
-            billing.setExpenses(expenses);
-            billing.setAdditionalCharges(BigDecimal.ZERO);
-            billing.setDebtAmount(debtAmount);
-            billing.setTotalAmount(totalAmount);
-            billing.setDueDate(contract.getDueDate());
-            billing.setStatus(newStatus == RentalContract.RentalContractStatus.PENDING ? Billing.BillingStatus.PENDING : Billing.BillingStatus.OVERDUE);
-            billing.setStatus(contract.getStatus() == RentalContract.RentalContractStatus.PENDING ? Billing.BillingStatus.PENDING : Billing.BillingStatus.OVERDUE);
-            billingRepository.save(billing);
-
-            count++;
-        }
-
-        return new BillingCountResponse(count);
+        return billingRepository.save(billing);
     }
 
     @Transactional(readOnly = true)
@@ -168,9 +136,7 @@ public class BillingService {
         PdfDocument pdf = new PdfDocument(writer);
         Document document = new Document(pdf);
 
-        // Encabezado
         document.add(new Paragraph("FACTURA").setBold().setFontSize(16));
-
         document.add(new Paragraph("Fecha de emisión: " + contract.getDueDate().toString()));
         document.add(new Paragraph("Emisor: Sistema de Alquileres"));
         document.add(new Paragraph("Cliente: " + tenant.getFirstName() + " " + tenant.getLastName()));
@@ -180,7 +146,6 @@ public class BillingService {
 
         document.add(new Paragraph("\n"));
 
-        // Tabla con detalles
         Table table = new Table(2);
         table.addCell("Descripción");
         table.addCell("Monto");
@@ -217,12 +182,16 @@ public class BillingService {
 
             count++;
         }
-        return count;
-    }
 
-    @Scheduled(cron = "0 0 0 * * ?")
-    public void notifyExpiringContractsScheduled() {
-        notifyExpiringContractsManual();
+        List<RentalContract> expiredContracts = rentalContractRepository.findByDueDateBefore(today);
+        for (RentalContract contract : expiredContracts) {
+            if (contract.getStatus() != RentalContract.RentalContractStatus.PAID) {
+                contract.setStatus(RentalContract.RentalContractStatus.OVERDUE);
+                rentalContractRepository.save(contract);
+            }
+        }
+
+        return count;
     }
 
     public BillingCountResponse sendBillingEmails(BillingRequest request) {
@@ -261,5 +230,13 @@ public class BillingService {
         emailService.sendBillingEmail(
                 tenant.getEmail(), pdf
         );
+    }
+
+    public List<byte[]> getAllBillingFiles(Long propertyId) {
+        List<Billing> billings = billingRepository.findByPropertyId(propertyId);
+
+        return billings.stream().map(b -> generatePdf(
+                b.getRentalContract().getTenant(), b.getProperty(), b.getRentalContract()
+        )).toList();
     }
 }

@@ -32,13 +32,6 @@ public class BillingController {
         return ResponseEntity.ok(ApiResponse.success("Success", properties));
     }
 
-    /*
-    @PostMapping("/billings")
-    public ResponseEntity<ApiResponse<BillingCountResponse>> createBillings(@RequestBody BillingRequest request) {
-        BillingCountResponse response = billingService.createBillings(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(201, "Billings created successfully", response));
-    }
-    */
     @GetMapping("/billings/export")
     public ResponseEntity<byte[]> exportBillings() {
         List<Billing> billings = billingService.getAllBillings();

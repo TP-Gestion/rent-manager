@@ -54,9 +54,13 @@ public class RentalContractService {
 
         // Validate that no rental contract already exists for this property
         List<RentalContract> existingContracts = rentalContractRepository.findByPropertyId(propertyId);
-        if (!existingContracts.isEmpty()) {
-            throw new DuplicateActiveContractException("Property with ID " + propertyId + " already has a rental contract.");
+
+        boolean hasActiveContract = existingContracts.stream().anyMatch(c -> c.getStatus() != RentalContract.RentalContractStatus.PAID);
+
+        if (hasActiveContract) {
+            throw new DuplicateActiveContractException("Property with ID " + propertyId + " already has an active rental contract.");
         }
+
 
         Tenant tenant = property.getTenant();
         if (tenant == null) {

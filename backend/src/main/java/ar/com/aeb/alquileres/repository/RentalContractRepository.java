@@ -21,4 +21,6 @@ public interface RentalContractRepository extends JpaRepository<RentalContract, 
     List<RentalContract> findByDueDate(LocalDate dueDate);
 
     List<RentalContract> findByDueDateBetween(LocalDate start, LocalDate end);
+
+    List<RentalContract> findByDueDateBefore(LocalDate date);
 }
