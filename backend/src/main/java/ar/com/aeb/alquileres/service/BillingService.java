@@ -256,7 +256,8 @@ public class BillingService {
 
         byte[] pdf = generatePdf(billing);
 
-        emailService.sendBillingEmail(tenant.getEmail(), pdf);
+        String tenantName = tenant.getFirstName() + " " + tenant.getLastName();
+        emailService.sendBillingEmail(tenant.getEmail(), tenantName, billing.getPeriod(), billing.getTotalAmount(), pdf);
     }
 
     @Transactional(readOnly = true)
