@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RentalContractRepository extends JpaRepository<RentalContract, Long> {
@@ -23,4 +24,7 @@ public interface RentalContractRepository extends JpaRepository<RentalContract, 
     List<RentalContract> findByDueDateBetween(LocalDate start, LocalDate end);
 
     List<RentalContract> findByDueDateBefore(LocalDate date);
+
+    Optional<RentalContract> findFirstByPropertyIdAndStatus(Long propertyId, RentalContract.RentalContractStatus status);
+
 }

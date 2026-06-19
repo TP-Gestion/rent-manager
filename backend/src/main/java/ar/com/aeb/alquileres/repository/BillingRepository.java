@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BillingRepository extends JpaRepository<Billing, Long> {
@@ -13,4 +14,6 @@ public interface BillingRepository extends JpaRepository<Billing, Long> {
     java.util.Optional<Billing> findByPropertyIdAndPeriod(Long propertyId, String period);
 
     List<Billing> findByRentalContractId(Long rentalContractId);
+
+    Optional<Billing> findByRentalContractIdAndPeriod(Long rentalContractId, String period);
 }

@@ -64,7 +64,7 @@ public class BillingService {
     public Billing createBillingForProperty(Long propertyId) {
         Property property = propertyRepository.findById(propertyId).orElseThrow(() -> new IllegalArgumentException("Property with ID " + propertyId + " not found"));
 
-        RentalContract contract = getLatestContract(propertyId).orElseThrow(() -> new IllegalArgumentException("No active rental contract found for property ID " + propertyId));
+        RentalContract contract = rentalContractRepository.findFirstByPropertyIdAndStatus(propertyId, RentalContract.RentalContractStatus.PENDING).orElseThrow(() -> new IllegalArgumentException("No hay contrato pendiente para la propiedad " + propertyId));
 
         BigDecimal expenses = getPendingExpenses(propertyId);
         BigDecimal debtAmount = contract.getStatus() == RentalContract.RentalContractStatus.PAID ? BigDecimal.ZERO : contract.getAmount();
@@ -129,14 +129,19 @@ public class BillingService {
         return billingRepository.findByPropertyId(propertyId).stream().filter(b -> b.getStatus() == Billing.BillingStatus.PENDING || b.getStatus() == Billing.BillingStatus.OVERDUE).map(Billing::getTotalAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private byte[] generatePdf(Tenant tenant, Property property, RentalContract contract) {
+    private byte[] generatePdf(Billing billing) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         PdfWriter writer = new PdfWriter(baos);
         PdfDocument pdf = new PdfDocument(writer);
         Document document = new Document(pdf);
 
+        Tenant tenant = billing.getTenant();
+        Property property = billing.getProperty();
+        RentalContract contract = billing.getRentalContract();
+
         document.add(new Paragraph("FACTURA").setBold().setFontSize(16));
+        document.add(new Paragraph("Factura ID: " + billing.getId()));
         document.add(new Paragraph("Fecha de emisión: " + contract.getDueDate().toString()));
         document.add(new Paragraph("Emisor: Sistema de Alquileres"));
         document.add(new Paragraph("Cliente: " + tenant.getFirstName() + " " + tenant.getLastName()));
@@ -176,11 +181,37 @@ public class BillingService {
         int count = 0;
 
         for (RentalContract contract : contracts) {
-            sendContractEmail(
-                    contract, contract.getProperty()
-            );
+            Property property = contract.getProperty();
+            String period = YearMonth.from(contract.getDueDate()).toString();
 
-            count++;
+            Optional<Billing> existingBilling = billingRepository.findByRentalContractIdAndPeriod(contract.getId(), period);
+
+            if (existingBilling.isEmpty()) {
+                Billing billing = new Billing();
+                billing.setProperty(property);
+                billing.setTenant(contract.getTenant());
+                billing.setRentalContract(contract);
+                billing.setPeriod(period);
+                billing.setRentAmount(contract.getAmount());
+                billing.setExpenses(getPendingExpenses(property.getId()));
+                billing.setAdditionalCharges(BigDecimal.ZERO);
+                billing.setDebtAmount(BigDecimal.ZERO);
+                billing.setTotalAmount(contract.getAmount().add(getPendingExpenses(property.getId())));
+                billing.setDueDate(contract.getDueDate());
+                billing.setStatus(Billing.BillingStatus.PENDING);
+                billing.setNotified(true);
+                billingRepository.save(billing);
+                sendContractEmail(billing);
+                count++;
+            } else {
+                Billing billing = existingBilling.get();
+
+                sendContractEmail(existingBilling.get());
+
+                billing.setNotified(true);
+                billingRepository.save(billing);
+                count++;
+            }
         }
 
         List<RentalContract> expiredContracts = rentalContractRepository.findByDueDateBefore(today);
@@ -195,48 +226,48 @@ public class BillingService {
     }
 
     public BillingCountResponse sendBillingEmails(BillingRequest request) {
-
         if (request.getPropertyIds() == null || request.getPropertyIds().isEmpty()) {
-            return new BillingCountResponse(0);
+            throw new IllegalArgumentException("Debes seleccionar al menos una propiedad");
         }
 
         int count = 0;
 
         for (Long propertyId : request.getPropertyIds()) {
+            Property property = propertyRepository.findById(propertyId).orElseThrow(() -> new IllegalArgumentException("Property with ID " + propertyId + " not found"));
 
-            Property property = propertyRepository.findById(propertyId).orElseThrow(() -> new IllegalArgumentException(
-                    "Property with ID " + propertyId + " not found"));
+            RentalContract contract = rentalContractRepository.findFirstByPropertyIdAndStatus(propertyId, RentalContract.RentalContractStatus.PENDING).orElseThrow(() -> new IllegalArgumentException("No pending rental contract found for property ID " + propertyId));
 
-            RentalContract contract = getLatestContract(propertyId).orElseThrow(() -> new IllegalArgumentException(
-                    "No active rental contract found for property ID " + propertyId));
+            String period = YearMonth.from(contract.getDueDate()).toString();
 
-            sendContractEmail(contract, property);
+            Optional<Billing> existing = billingRepository.findByPropertyIdAndPeriod(propertyId, period);
 
+            Billing billing = existing.orElseGet(() -> createBillingForProperty(propertyId));
+
+            sendContractEmail(billing);
             count++;
         }
 
         return new BillingCountResponse(count);
     }
 
-    private void sendContractEmail(
-                                   RentalContract contract, Property property) {
 
-        Tenant tenant = contract.getTenant();
+    private void sendContractEmail(Billing billing) {
+        Tenant tenant = billing.getTenant();
 
-        byte[] pdf = generatePdf(
-                tenant, property, contract
-        );
+        byte[] pdf = generatePdf(billing);
 
-        emailService.sendBillingEmail(
-                tenant.getEmail(), pdf
-        );
+        emailService.sendBillingEmail(tenant.getEmail(), pdf);
     }
 
-    public List<byte[]> getAllBillingFiles(Long propertyId) {
-        List<Billing> billings = billingRepository.findByPropertyId(propertyId);
+    @Transactional(readOnly = true)
+    public byte[] getPdfFile(Long billingId) {
+        Billing billing = billingRepository.findById(billingId).orElseThrow(() -> new IllegalArgumentException("Factura con ID " + billingId + " no encontrada"));
 
-        return billings.stream().map(b -> generatePdf(
-                b.getRentalContract().getTenant(), b.getProperty(), b.getRentalContract()
-        )).toList();
+        return generatePdf(billing);
+    }
+
+    @Transactional(readOnly = true)
+    public Billing getBillingById(Long billingId) {
+        return billingRepository.findById(billingId).orElseThrow(() -> new IllegalArgumentException("Factura con ID " + billingId + " no encontrada"));
     }
 }

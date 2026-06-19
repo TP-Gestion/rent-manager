@@ -2,6 +2,9 @@ package ar.com.aeb.alquileres.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.annotation.PostConstruct;
+import jakarta.mail.Message;
+import jakarta.mail.internet.InternetAddress;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.core.io.ByteArrayResource;
@@ -13,6 +16,24 @@ public class EmailService {
 
     @Autowired
     private JavaMailSender mailSender;
+
+    @Autowired
+    public EmailService(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
+    }
+
+    @PostConstruct
+    public void init() {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            message.setSubject("Init");
+            message.setText("Init");
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("dummy@localhost"));
+            mailSender.send(message);
+        } catch (Exception e) {
+            System.err.println("Error inicializando conexión SMTP: " + e.getMessage());
+        }
+    }
 
     public void sendBillingEmail(String to, byte[] pdf) {
         MimeMessage message = mailSender.createMimeMessage();
