@@ -42,8 +42,7 @@ class PaymentControllerTest extends BaseControllerTest {
         Building building = buildingRepository.save(new Building("TORRE CENTRAL", "Av. Corrientes 1234"));
         counter++;
         Tenant tenant = tenantRepository.save(new Tenant(
-                firstName, lastName, firstName.toLowerCase() + counter + "@test.com",
-                "11" + String.format("%08d", counter)));
+                firstName, lastName, firstName.toLowerCase() + counter + "@test.com", "11" + String.format("%08d", counter)));
 
         Property property = new Property();
         property.setBuilding(building);
@@ -71,8 +70,7 @@ class PaymentControllerTest extends BaseControllerTest {
         Building building = buildingRepository.save(new Building("TORRE CENTRAL", "Av. Corrientes 1234"));
         counter++;
         Tenant tenant = tenantRepository.save(new Tenant(
-                "Tenant" + counter, "Test", "tenant" + counter + "@test.com",
-                "11" + String.format("%08d", counter)));
+                "Tenant" + counter, "Test", "tenant" + counter + "@test.com", "11" + String.format("%08d", counter)));
 
         Property property = new Property();
         property.setBuilding(building);
@@ -112,19 +110,7 @@ class PaymentControllerTest extends BaseControllerTest {
         Property property = buildProperty();
         Billing billing = buildBilling(property, "2026-03", Billing.BillingStatus.OVERDUE);
 
-        mockMvc.perform(multipart("/api/v1/properties/" + property.getId() + "/payments")
-                .param("amount", "100000")
-                .param("paymentMethod", "BANK_TRANSFER")
-                .param("paymentDate", "2026-04-01")
-                .param("reference", "TX123456789")
-                .param("notes", "Pago correspondiente a marzo")
-                .param("selectedPeriods", "2026-03"))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.status").value(201))
-                .andExpect(jsonPath("$.data.amount").value(100000))
-                .andExpect(jsonPath("$.data.paymentMethod").value("BANK_TRANSFER"))
-                .andExpect(jsonPath("$.data.reference").value("TX123456789"))
-                .andExpect(jsonPath("$.data.periods", hasItem("2026-03")));
+        mockMvc.perform(multipart("/api/v1/properties/" + property.getId() + "/payments").param("amount", "100000").param("paymentMethod", "BANK_TRANSFER").param("paymentDate", "2026-04-01").param("reference", "TX123456789").param("notes", "Pago correspondiente a marzo").param("selectedPeriods", "2026-03")).andExpect(status().isCreated()).andExpect(jsonPath("$.status").value(201)).andExpect(jsonPath("$.data.amount").value(100000)).andExpect(jsonPath("$.data.paymentMethod").value("BANK_TRANSFER")).andExpect(jsonPath("$.data.reference").value("TX123456789")).andExpect(jsonPath("$.data.periods", hasItem("2026-03")));
 
         // Verify billing marked as PAID in DB
         Billing updated = billingRepository.findById(billing.getId()).orElseThrow();
@@ -138,15 +124,7 @@ class PaymentControllerTest extends BaseControllerTest {
         Billing b2 = buildBilling(property, "2026-03", Billing.BillingStatus.OVERDUE);
         Billing b3 = buildBilling(property, "2026-04", Billing.BillingStatus.PENDING);
 
-        mockMvc.perform(multipart("/api/v1/properties/" + property.getId() + "/payments")
-                .param("amount", "200000")
-                .param("paymentMethod", "BANK_TRANSFER")
-                .param("paymentDate", "2026-05-01")
-                .param("reference", "TX987654321")
-                .param("notes", "Pago de deuda acumulada")
-                .param("selectedPeriods", "2026-02", "2026-03"))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.periods", hasItems("2026-02", "2026-03")));
+        mockMvc.perform(multipart("/api/v1/properties/" + property.getId() + "/payments").param("amount", "200000").param("paymentMethod", "BANK_TRANSFER").param("paymentDate", "2026-05-01").param("reference", "TX987654321").param("notes", "Pago de deuda acumulada").param("selectedPeriods", "2026-02", "2026-03")).andExpect(status().isCreated()).andExpect(jsonPath("$.data.periods", hasItems("2026-02", "2026-03")));
 
         // Selected billings → PAID
         assert billingRepository.findById(b1.getId()).orElseThrow().getStatus() == Billing.BillingStatus.PAID;
@@ -159,48 +137,28 @@ class PaymentControllerTest extends BaseControllerTest {
     void test02_registerPayment_emptySelectedPeriods_returnsBadRequest() throws Exception {
         Property property = buildProperty();
 
-        mockMvc.perform(multipart("/api/v1/properties/" + property.getId() + "/payments")
-                .param("amount", "100000")
-                .param("paymentMethod", "BANK_TRANSFER")
-                .param("paymentDate", "2026-04-01"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+        mockMvc.perform(multipart("/api/v1/properties/" + property.getId() + "/payments").param("amount", "100000").param("paymentMethod", "BANK_TRANSFER").param("paymentDate", "2026-04-01")).andExpect(status().isBadRequest()).andExpect(jsonPath("$.status").value(400));
     }
 
     @Test
     void test03_registerPayment_missingAmount_returnsBadRequest() throws Exception {
         Property property = buildProperty();
 
-        mockMvc.perform(multipart("/api/v1/properties/" + property.getId() + "/payments")
-                .param("paymentMethod", "BANK_TRANSFER")
-                .param("paymentDate", "2026-04-01")
-                .param("selectedPeriods", "2026-03"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+        mockMvc.perform(multipart("/api/v1/properties/" + property.getId() + "/payments").param("paymentMethod", "BANK_TRANSFER").param("paymentDate", "2026-04-01").param("selectedPeriods", "2026-03")).andExpect(status().isBadRequest()).andExpect(jsonPath("$.status").value(400));
     }
 
     @Test
     void test04_registerPayment_missingPaymentMethod_returnsBadRequest() throws Exception {
         Property property = buildProperty();
 
-        mockMvc.perform(multipart("/api/v1/properties/" + property.getId() + "/payments")
-                .param("amount", "100000")
-                .param("paymentDate", "2026-04-01")
-                .param("selectedPeriods", "2026-03"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+        mockMvc.perform(multipart("/api/v1/properties/" + property.getId() + "/payments").param("amount", "100000").param("paymentDate", "2026-04-01").param("selectedPeriods", "2026-03")).andExpect(status().isBadRequest()).andExpect(jsonPath("$.status").value(400));
     }
 
     @Test
     void test05_registerPayment_missingPaymentDate_returnsBadRequest() throws Exception {
         Property property = buildProperty();
 
-        mockMvc.perform(multipart("/api/v1/properties/" + property.getId() + "/payments")
-                .param("amount", "100000")
-                .param("paymentMethod", "CASH")
-                .param("selectedPeriods", "2026-03"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.status").value(400));
+        mockMvc.perform(multipart("/api/v1/properties/" + property.getId() + "/payments").param("amount", "100000").param("paymentMethod", "CASH").param("selectedPeriods", "2026-03")).andExpect(status().isBadRequest()).andExpect(jsonPath("$.status").value(400));
     }
 
     @Test
@@ -208,24 +166,12 @@ class PaymentControllerTest extends BaseControllerTest {
         Property property = buildProperty();
         buildBilling(property, "2026-03", Billing.BillingStatus.PAID);
 
-        mockMvc.perform(multipart("/api/v1/properties/" + property.getId() + "/payments")
-                .param("amount", "100000")
-                .param("paymentMethod", "CASH")
-                .param("paymentDate", "2026-04-01")
-                .param("selectedPeriods", "2026-03"))
-                .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.status").value(422));
+        mockMvc.perform(multipart("/api/v1/properties/" + property.getId() + "/payments").param("amount", "100000").param("paymentMethod", "CASH").param("paymentDate", "2026-04-01").param("selectedPeriods", "2026-03")).andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.status").value(422));
     }
 
     @Test
     void test07_registerPayment_propertyNotFound_returnsNotFound() throws Exception {
-        mockMvc.perform(multipart("/api/v1/properties/99999/payments")
-                .param("amount", "100000")
-                .param("paymentMethod", "CASH")
-                .param("paymentDate", "2026-04-01")
-                .param("selectedPeriods", "2026-03"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404));
+        mockMvc.perform(multipart("/api/v1/properties/99999/payments").param("amount", "100000").param("paymentMethod", "CASH").param("paymentDate", "2026-04-01").param("selectedPeriods", "2026-03")).andExpect(status().isNotFound()).andExpect(jsonPath("$.status").value(404));
     }
 
     // ── GET /api/v1/properties/{id}/payments ───────────────────────────────────
@@ -236,31 +182,15 @@ class PaymentControllerTest extends BaseControllerTest {
         Property property = buildProperty();
         buildBilling(property, "2026-03", Billing.BillingStatus.OVERDUE);
 
-        mockMvc.perform(multipart("/api/v1/properties/" + property.getId() + "/payments")
-                .param("amount", "100000")
-                .param("paymentMethod", "BANK_TRANSFER")
-                .param("paymentDate", "2026-04-01")
-                .param("reference", "TX123")
-                .param("selectedPeriods", "2026-03"));
+        mockMvc.perform(multipart("/api/v1/properties/" + property.getId() + "/payments").param("amount", "100000").param("paymentMethod", "BANK_TRANSFER").param("paymentDate", "2026-04-01").param("reference", "TX123").param("selectedPeriods", "2026-03"));
 
         // Execute & Verify
-        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/payments"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(200))
-                .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data.length()").value(1))
-                .andExpect(jsonPath("$.data[0].date").value("2026-04-01"))
-                .andExpect(jsonPath("$.data[0].amount").value(100000))
-                .andExpect(jsonPath("$.data[0].paymentMethod").value("BANK_TRANSFER"))
-                .andExpect(jsonPath("$.data[0].reference").value("TX123"))
-                .andExpect(jsonPath("$.data[0].periods", hasItem("2026-03")));
+        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/payments")).andExpect(status().isOk()).andExpect(jsonPath("$.status").value(200)).andExpect(jsonPath("$.data").isArray()).andExpect(jsonPath("$.data.length()").value(1)).andExpect(jsonPath("$.data[0].date").value("2026-04-01")).andExpect(jsonPath("$.data[0].amount").value(100000)).andExpect(jsonPath("$.data[0].paymentMethod").value("BANK_TRANSFER")).andExpect(jsonPath("$.data[0].reference").value("TX123")).andExpect(jsonPath("$.data[0].periods", hasItem("2026-03")));
     }
 
     @Test
     void test09_getPayments_propertyNotFound_returnsNotFound() throws Exception {
-        mockMvc.perform(get("/api/v1/properties/99999/payments"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404));
+        mockMvc.perform(get("/api/v1/properties/99999/payments")).andExpect(status().isNotFound()).andExpect(jsonPath("$.status").value(404));
     }
 
     // ── Regla 3: el historial muestra el inquilino que realizó cada pago ─────────
@@ -270,10 +200,7 @@ class PaymentControllerTest extends BaseControllerTest {
         Property property = buildPropertyWithTenant("Juan", "Pérez");
         registerPaymentFor(property);
 
-        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/payments"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].tenant.firstName").value("Juan"))
-                .andExpect(jsonPath("$.data[0].tenant.lastName").value("Pérez"));
+        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/payments")).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].tenant.firstName").value("Juan")).andExpect(jsonPath("$.data[0].tenant.lastName").value("Pérez"));
     }
 
     // ── Regla 1: desvincular inquilino sin perder historial ─────────────────────
@@ -284,8 +211,7 @@ class PaymentControllerTest extends BaseControllerTest {
         registerPaymentFor(property);
 
         // Cuando elimino al inquilino de la propiedad
-        mockMvc.perform(delete("/api/v1/properties/" + property.getId() + "/tenant"))
-                .andExpect(status().isOk());
+        mockMvc.perform(delete("/api/v1/properties/" + property.getId() + "/tenant")).andExpect(status().isOk());
 
         // Entonces: la propiedad queda sin inquilino asignado
         Property reloaded = propertyRepository.findById(property.getId()).orElseThrow();
@@ -293,11 +219,7 @@ class PaymentControllerTest extends BaseControllerTest {
         org.junit.jupiter.api.Assertions.assertEquals(Property.OccupancyStatus.AVAILABLE, reloaded.getOccupancyStatus());
 
         // Y el historial sigue mostrando que el pago fue realizado por "Juan Pérez"
-        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/payments"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.length()").value(1))
-                .andExpect(jsonPath("$.data[0].tenant.firstName").value("Juan"))
-                .andExpect(jsonPath("$.data[0].tenant.lastName").value("Pérez"));
+        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/payments")).andExpect(status().isOk()).andExpect(jsonPath("$.data.length()").value(1)).andExpect(jsonPath("$.data[0].tenant.firstName").value("Juan")).andExpect(jsonPath("$.data[0].tenant.lastName").value("Pérez"));
     }
 
     // ── Regla 2: asignar nuevo inquilino conservando historial ──────────────────
@@ -308,22 +230,17 @@ class PaymentControllerTest extends BaseControllerTest {
         registerPaymentFor(property);
 
         // Elimino a "Juan Pérez"
-        mockMvc.perform(delete("/api/v1/properties/" + property.getId() + "/tenant"))
-                .andExpect(status().isOk());
+        mockMvc.perform(delete("/api/v1/properties/" + property.getId() + "/tenant")).andExpect(status().isOk());
 
         // Y posteriormente asigno a "María Gómez"
         Tenant maria = tenantRepository.save(new Tenant("María", "Gómez", "maria" + (++counter) + "@test.com", "11" + String.format("%08d", counter)));
-        mockMvc.perform(patch("/api/v1/properties/" + property.getId() + "/tenant/" + maria.getId()))
-                .andExpect(status().isOk());
+        mockMvc.perform(patch("/api/v1/properties/" + property.getId() + "/tenant/" + maria.getId())).andExpect(status().isOk());
 
         // La propiedad queda asociada a María, pero el pago histórico sigue mostrando "Juan Pérez"
         Property reloaded = propertyRepository.findById(property.getId()).orElseThrow();
         org.junit.jupiter.api.Assertions.assertEquals("María", reloaded.getTenant().getFirstName());
 
-        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/payments"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].tenant.firstName").value("Juan"))
-                .andExpect(jsonPath("$.data[0].tenant.lastName").value("Pérez"));
+        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/payments")).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].tenant.firstName").value("Juan")).andExpect(jsonPath("$.data[0].tenant.lastName").value("Pérez"));
     }
 
     // ── Comentario backend: pagos históricos sin inquilino (legacy) → tenant null ─
@@ -335,9 +252,7 @@ class PaymentControllerTest extends BaseControllerTest {
         payment.setTenant(null); // simula un pago anterior a la feature
         paymentRepository.save(payment);
 
-        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/payments"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].tenant").doesNotExist());
+        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/payments")).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].tenant").doesNotExist());
     }
 
     // ── GET /billings: muestra el inquilino al que se le facturó ─────────────────
@@ -348,18 +263,11 @@ class PaymentControllerTest extends BaseControllerTest {
         buildBilling(property, "2026-06", Billing.BillingStatus.PENDING);
 
         // El billing muestra al inquilino facturado
-        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/billings"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].tenant.firstName").value("Juan"))
-                .andExpect(jsonPath("$.data[0].tenant.lastName").value("Pérez"));
+        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/billings")).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].tenant.firstName").value("Juan")).andExpect(jsonPath("$.data[0].tenant.lastName").value("Pérez"));
 
         // Tras desvincular al inquilino, el billing histórico sigue mostrando "Juan Pérez"
-        mockMvc.perform(delete("/api/v1/properties/" + property.getId() + "/tenant"))
-                .andExpect(status().isOk());
+        mockMvc.perform(delete("/api/v1/properties/" + property.getId() + "/tenant")).andExpect(status().isOk());
 
-        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/billings"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data[0].tenant.firstName").value("Juan"))
-                .andExpect(jsonPath("$.data[0].tenant.lastName").value("Pérez"));
+        mockMvc.perform(get("/api/v1/properties/" + property.getId() + "/billings")).andExpect(status().isOk()).andExpect(jsonPath("$.data[0].tenant.firstName").value("Juan")).andExpect(jsonPath("$.data[0].tenant.lastName").value("Pérez"));
     }
 }

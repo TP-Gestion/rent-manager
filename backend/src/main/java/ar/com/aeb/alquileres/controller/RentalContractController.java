@@ -5,7 +5,6 @@ import ar.com.aeb.alquileres.dto.rentalcontract.RentalContractRequest;
 import ar.com.aeb.alquileres.dto.rentalcontract.RentalContractResponse;
 import ar.com.aeb.alquileres.model.RentalContract;
 import ar.com.aeb.alquileres.service.RentalContractService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

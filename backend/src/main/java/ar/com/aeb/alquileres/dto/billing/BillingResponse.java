@@ -25,9 +25,7 @@ public class BillingResponse {
         this.status = billing.getStatus().name();
         this.amount = billing.getTotalAmount();
         this.dueDate = billing.getDueDate();
-        this.paymentDate = billing.getPayment() != null
-                ? billing.getPayment().getPaymentDate()
-                : null;
+        this.paymentDate = billing.getPayment() != null ? billing.getPayment().getPaymentDate() : null;
         // Historical tenant snapshot: the tenant that was billed, independent of the
         // current Property-Tenant relation. Null for billings created before this feature.
         this.tenant = billing.getTenant() != null ? new TenantInfo(billing.getTenant()) : null;

@@ -12,8 +12,8 @@ import ar.com.aeb.alquileres.model.Billing;
 import ar.com.aeb.alquileres.repository.RentalContractRepository;
 import ar.com.aeb.alquileres.repository.PropertyRepository;
 import ar.com.aeb.alquileres.repository.BillingRepository;
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import ar.com.aeb.alquileres.model.Tenant;
+import ar.com.aeb.alquileres.repository.TenantRepository;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,6 +43,9 @@ public class RentalContractService {
     @org.springframework.beans.factory.annotation.Value("${upload.contracts.path:uploads/contracts}")
     private String uploadPath;
 
+    @Autowired
+    private TenantRepository tenantRepository;
+
     /**
      * Create a new rental contract
      */
@@ -51,20 +54,28 @@ public class RentalContractService {
 
         // Validate that no rental contract already exists for this property
         List<RentalContract> existingContracts = rentalContractRepository.findByPropertyId(propertyId);
-        if (!existingContracts.isEmpty()) {
-            throw new DuplicateActiveContractException("Property with ID " + propertyId + " already has a rental contract.");
+
+        boolean hasActiveContract = existingContracts.stream().anyMatch(c -> c.getStatus() != RentalContract.RentalContractStatus.PAID);
+
+        if (hasActiveContract) {
+            throw new DuplicateActiveContractException("Property with ID " + propertyId + " already has an active rental contract.");
+        }
+
+
+        Tenant tenant = property.getTenant();
+        if (tenant == null) {
+            throw new IllegalStateException("Property has no tenant assigned");
         }
 
         RentalContract contract = new RentalContract(
                 property, request.getAmount(), request.getDueDate()
         );
+        contract.setTenant(tenant);
 
         MultipartFile file = request.getContract();
         if (file != null && !file.isEmpty()) {
             YearMonth now = YearMonth.now();
-            String fileName = fileStorageService.storeFile(uploadPath, file,
-                    String.valueOf(now.getYear()),
-                    String.format("%02d", now.getMonthValue()));
+            String fileName = fileStorageService.storeFile(uploadPath, file, String.valueOf(now.getYear()), String.format("%02d", now.getMonthValue()));
             contract.setContractPath(fileName);
         }
 
@@ -74,8 +85,7 @@ public class RentalContractService {
 
     @Transactional(readOnly = true)
     public Resource getContractResource(Long id) {
-        RentalContract contract = rentalContractRepository.findById(id)
-                .orElseThrow(() -> new RentalContractNotFoundException(id));
+        RentalContract contract = rentalContractRepository.findById(id).orElseThrow(() -> new RentalContractNotFoundException(id));
 
         if (contract.getContractPath() == null) {
             throw new RuntimeException("No contract file found for this record");
@@ -143,9 +153,7 @@ public class RentalContractService {
             }
 
             YearMonth now = YearMonth.now();
-            String fileName = fileStorageService.storeFile(uploadPath, file,
-                    String.valueOf(now.getYear()),
-                    String.format("%02d", now.getMonthValue()));
+            String fileName = fileStorageService.storeFile(uploadPath, file, String.valueOf(now.getYear()), String.format("%02d", now.getMonthValue()));
             contract.setContractPath(fileName);
         }
 
@@ -158,7 +166,7 @@ public class RentalContractService {
      */
     public void delete(Long id) {
         RentalContract contract = rentalContractRepository.findById(id).orElseThrow(() -> new RentalContractNotFoundException(id));
-        
+
         // Delete related billings
         List<Billing> billings = billingRepository.findByRentalContractId(id);
         billingRepository.deleteAll(billings);
@@ -167,7 +175,7 @@ public class RentalContractService {
         if (contract.getContractPath() != null) {
             fileStorageService.deleteFile(uploadPath, contract.getContractPath());
         }
-        
+
         rentalContractRepository.delete(contract);
     }
 

@@ -118,9 +118,7 @@ public class TenantService {
         if (!tenantRepository.existsById(id)) {
             throw new TenantNotFoundException(id);
         }
-        return buildingRepository.findDistinctByTenantId(id).stream()
-                .map(BuildingResponse::new)
-                .collect(Collectors.toList());
+        return buildingRepository.findDistinctByTenantId(id).stream().map(BuildingResponse::new).collect(Collectors.toList());
     }
 
     /**

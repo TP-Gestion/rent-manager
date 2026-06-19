@@ -48,6 +48,10 @@ public class Payment extends BaseEntity {
     @OneToMany(mappedBy = "payment", fetch = FetchType.EAGER)
     private List<Billing> billings = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "billing_id")
+    private Billing billing;
+
     public Payment() {
     }
 
@@ -125,5 +129,13 @@ public class Payment extends BaseEntity {
 
     public enum PaymentMethod {
         BANK_TRANSFER, CASH, CHECK, DEBIT, CREDIT
+    }
+
+    public Billing getBilling() {
+        return billing;
+    }
+
+    public void setBilling(Billing billing) {
+        this.billing = billing;
     }
 }

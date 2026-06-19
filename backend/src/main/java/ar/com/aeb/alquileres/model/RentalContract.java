@@ -31,6 +31,9 @@ public class RentalContract extends BaseEntity {
     @Column(name = "contract_path")
     private String contractPath;
 
+    @ManyToOne
+    private Tenant tenant;
+
     public RentalContract() {
     }
 
@@ -83,5 +86,13 @@ public class RentalContract extends BaseEntity {
 
     public enum RentalContractStatus {
         PENDING, PAID, OVERDUE
+    }
+
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
     }
 }

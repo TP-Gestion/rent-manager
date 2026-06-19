@@ -10,7 +10,6 @@ import ar.com.aeb.alquileres.service.ExcelExportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,13 +32,6 @@ public class BillingController {
         return ResponseEntity.ok(ApiResponse.success("Success", properties));
     }
 
-    @PostMapping("/billings")
-    public ResponseEntity<ApiResponse<BillingCountResponse>> createBillings(@RequestBody BillingRequest request) {
-        BillingCountResponse response = billingService.createBillings(request);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(201, "Billings created successfully", response));
-    }
-
     @GetMapping("/billings/export")
     public ResponseEntity<byte[]> exportBillings() {
         List<Billing> billings = billingService.getAllBillings();
@@ -48,10 +40,24 @@ public class BillingController {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
-        headers.setContentDisposition(ContentDisposition.attachment()
-                .filename("facturas.xlsx")
-                .build());
+        headers.setContentDisposition(ContentDisposition.attachment().filename("facturas.xlsx").build());
 
         return ResponseEntity.ok().headers(headers).body(excel);
+    }
+
+    @PostMapping("/billings/notify-expiring")
+    public ResponseEntity<ApiResponse<Integer>> notifyExpiringContracts() {
+        int count = billingService.notifyExpiringContractsManual();
+        return ResponseEntity.ok(ApiResponse.success("Notifications sent", count));
+    }
+
+    @PostMapping("/billings")
+    public ResponseEntity<ApiResponse<BillingCountResponse>> sendBillingEmails(@RequestBody BillingRequest request) {
+
+        BillingCountResponse response = billingService.sendBillingEmails(request);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        200, "Billing emails sent successfully", response));
     }
 }

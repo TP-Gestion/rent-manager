@@ -43,7 +43,7 @@ class RentalContractControllerTest extends BaseControllerTest {
     void testUpdateContract_withPdf_returnsOk() throws Exception {
         // Setup
         Building building = buildingRepository.save(new Building("Test Building", "Test Address"));
-        
+
         Property property = new Property();
         property.setBuilding(building);
         property.setFloor("1A");
@@ -57,33 +57,22 @@ class RentalContractControllerTest extends BaseControllerTest {
         contract = rentalContractRepository.save(contract);
 
         MockMultipartFile pdfFile = new MockMultipartFile(
-                "contract",
-                "test.pdf",
-                "application/pdf",
-                "test content".getBytes()
+                "contract", "test.pdf", "application/pdf", "test content".getBytes()
         );
 
-        Mockito.when(fileStorageService.storeFile(any(), eq(pdfFile), any(), any()))
-                .thenReturn("2026/05/test_mock.pdf");
+        Mockito.when(fileStorageService.storeFile(any(), eq(pdfFile), any(), any())).thenReturn("2026/05/test_mock.pdf");
 
         // Execute & Verify
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/rental-contracts/" + contract.getId())
-                        .file(pdfFile)
-                        .param("amount", "1500.00")
-                        .param("dueDate", LocalDate.now().plusMonths(2).toString())
-                        .with(request -> {
-                            request.setMethod("PUT");
-                            return request;
-                        }))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.amount").value(1500.00))
-                .andExpect(jsonPath("$.data.hasContract").value(true));
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/rental-contracts/" + contract.getId()).file(pdfFile).param("amount", "1500.00").param("dueDate", LocalDate.now().plusMonths(2).toString()).with(request -> {
+            request.setMethod("PUT");
+            return request;
+        })).andExpect(status().isOk()).andExpect(jsonPath("$.data.amount").value(1500.00)).andExpect(jsonPath("$.data.hasContract").value(true));
 
         // Verify in DB
         RentalContract updated = rentalContractRepository.findById(contract.getId()).orElseThrow();
         assert updated.getAmount().compareTo(new BigDecimal("1500.00")) == 0;
         assert updated.getContractPath().equals("2026/05/test_mock.pdf");
-        
+
         // Verify deleteFile was called for the old path (if it had one, in this case it didn't)
         Mockito.verify(fileStorageService, Mockito.atLeastOnce()).storeFile(any(), any(), any(), any());
     }
@@ -107,15 +96,10 @@ class RentalContractControllerTest extends BaseControllerTest {
         contract = rentalContractRepository.save(contract);
 
         // Execute & Verify - Only update amount
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/rental-contracts/" + contract.getId())
-                        .param("amount", "2500.00")
-                        .with(request -> {
-                            request.setMethod("PUT");
-                            return request;
-                        }))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.amount").value(2500.00))
-                .andExpect(jsonPath("$.data.dueDate").value(originalDate.toString()));
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/rental-contracts/" + contract.getId()).param("amount", "2500.00").with(request -> {
+            request.setMethod("PUT");
+            return request;
+        })).andExpect(status().isOk()).andExpect(jsonPath("$.data.amount").value(2500.00)).andExpect(jsonPath("$.data.dueDate").value(originalDate.toString()));
 
         // Verify in DB
         RentalContract updated = rentalContractRepository.findById(contract.getId()).orElseThrow();
@@ -142,8 +126,7 @@ class RentalContractControllerTest extends BaseControllerTest {
         contract = rentalContractRepository.save(contract);
 
         // Execute
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/rental-contracts/" + contract.getId()))
-                .andExpect(status().isNoContent());
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/rental-contracts/" + contract.getId())).andExpect(status().isNoContent());
 
         // Verify
         Mockito.verify(fileStorageService).deleteFile(any(), eq("path/to/delete.pdf"));

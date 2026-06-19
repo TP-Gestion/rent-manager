@@ -11,6 +11,8 @@ import ar.com.aeb.alquileres.dto.expense.ExpenseRequest;
 import ar.com.aeb.alquileres.dto.expense.ExpenseResponse;
 import ar.com.aeb.alquileres.dto.rentalcontract.RentalContractRequest;
 import ar.com.aeb.alquileres.dto.rentalcontract.RentalContractResponse;
+import ar.com.aeb.alquileres.model.Billing;
+import ar.com.aeb.alquileres.service.BillingService;
 import ar.com.aeb.alquileres.service.PropertyService;
 import ar.com.aeb.alquileres.service.ExpenseService;
 import ar.com.aeb.alquileres.service.RentalContractService;
@@ -24,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -41,6 +44,9 @@ public class PropertyController {
 
     @Autowired
     private PaymentDetailsService paymentDetailsService;
+
+    @Autowired
+    private BillingService billingService;
 
     /**
      * CREATE - Add a new property
@@ -183,8 +189,7 @@ public class PropertyController {
      */
     @PostMapping(value = "/{propertyId}/rental-contract", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<RentalContractResponse>> createPropertyRentalContract(
-            @PathVariable Long propertyId,
-            @ModelAttribute RentalContractRequest request) {
+                                                                                            @PathVariable Long propertyId, @ModelAttribute RentalContractRequest request) {
         RentalContractResponse response = rentalContractService.create(propertyId, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(HttpStatus.CREATED.value(), "Rental contract created successfully", response));
     }
@@ -195,9 +200,27 @@ public class PropertyController {
     @GetMapping("/{propertyId}/rental-contract/{contractId}/file")
     public ResponseEntity<Resource> getContractFile(@PathVariable Long propertyId, @PathVariable Long contractId) {
         Resource resource = rentalContractService.getContractResource(contractId);
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_PDF)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
-                .body(resource);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"").body(resource);
     }
+
+    @GetMapping("/{propertyId}/billings/{billingId}/file")
+    public ResponseEntity<byte[]> getBillingFile(
+                                                 @PathVariable Long propertyId, @PathVariable Long billingId) throws IOException {
+
+        Billing billing = billingService.getBillingById(billingId);
+
+        if (billing == null || !billing.getProperty().getId().equals(propertyId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        byte[] pdf = billingService.getPdfFile(billingId);
+
+        if (pdf == null || pdf.length == 0) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=factura_" + billingId + ".pdf").contentType(MediaType.APPLICATION_PDF).body(pdf);
+    }
+
+
 }
