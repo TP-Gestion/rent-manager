@@ -22,34 +22,38 @@ public class EmailService {
         this.mailSender = mailSender;
     }
 
-    @PostConstruct
-    public void init() {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            message.setSubject("Init");
-            message.setText("Init");
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("dummy@localhost"));
-            mailSender.send(message);
-        } catch (Exception e) {
-            System.err.println("Error inicializando conexión SMTP: " + e.getMessage());
-        }
-    }
+    // Envío de mails deshabilitado temporalmente para que no sea bloqueante.
+    // @PostConstruct
+    // public void init() {
+    //     try {
+    //         MimeMessage message = mailSender.createMimeMessage();
+    //         message.setSubject("Init");
+    //         message.setText("Init");
+    //         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("dummy@localhost"));
+    //         mailSender.send(message);
+    //     } catch (Exception e) {
+    //         System.err.println("Error inicializando conexión SMTP: " + e.getMessage());
+    //     }
+    // }
 
     public void sendBillingEmail(String to, byte[] pdf) {
-        MimeMessage message = mailSender.createMimeMessage();
+        // Envío de mails deshabilitado temporalmente para que no sea bloqueante.
+        System.out.println("[EmailService] Envío de mail deshabilitado. Destinatario: " + to);
 
-        try {
-            MimeMessageHelper helper = new MimeMessageHelper(message, true);
-            helper.setTo(to);
-            helper.setSubject("Factura de alquiler");
-            helper.setText("Adjunto encontrarás tu factura de alquiler.");
-
-            // Adjuntar el PDF
-            helper.addAttachment("factura.pdf", new ByteArrayResource(pdf));
-
-            mailSender.send(message);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Error enviando mail", e);
-        }
+        // MimeMessage message = mailSender.createMimeMessage();
+        //
+        // try {
+        //     MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        //     helper.setTo(to);
+        //     helper.setSubject("Factura de alquiler");
+        //     helper.setText("Adjunto encontrarás tu factura de alquiler.");
+        //
+        //     // Adjuntar el PDF
+        //     helper.addAttachment("factura.pdf", new ByteArrayResource(pdf));
+        //
+        //     mailSender.send(message);
+        // } catch (MessagingException e) {
+        //     throw new RuntimeException("Error enviando mail", e);
+        // }
     }
 }
