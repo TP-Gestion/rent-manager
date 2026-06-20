@@ -60,4 +60,12 @@ public class BillingController {
                 ApiResponse.success(
                         200, "Billing emails sent successfully", response));
     }
+
+    // DIAGNÓSTICO (temporal): envía la factura de una propiedad de forma sincrónica
+    // y devuelve el resultado/error real en la respuesta, para debug sin acceso a logs.
+    @PostMapping("/billings/{propertyId}/test-email")
+    public ResponseEntity<ApiResponse<String>> testBillingEmail(@PathVariable Long propertyId) {
+        String result = billingService.sendBillingEmailSyncForTest(propertyId);
+        return ResponseEntity.ok(ApiResponse.success(200, "Resultado del envío de prueba", result));
+    }
 }

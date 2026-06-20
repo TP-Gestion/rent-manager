@@ -260,6 +260,34 @@ public class BillingService {
         emailService.sendBillingEmail(tenant.getEmail(), tenantName, billing.getPeriod(), billing.getTotalAmount(), pdf);
     }
 
+    /**
+     * DIAGNÓSTICO: envía la factura de una propiedad de forma SINCRÓNICA y devuelve
+     * el resultado real (OK o el error), para poder ver qué pasa sin acceso a logs.
+     */
+    public String sendBillingEmailSyncForTest(Long propertyId) {
+        Property property = propertyRepository.findById(propertyId)
+                .orElseThrow(() -> new IllegalArgumentException("Property with ID " + propertyId + " not found"));
+
+        RentalContract contract = rentalContractRepository
+                .findFirstByPropertyIdAndStatus(propertyId, RentalContract.RentalContractStatus.PENDING)
+                .orElseThrow(() -> new IllegalArgumentException("No pending rental contract found for property ID " + propertyId));
+
+        String period = YearMonth.from(contract.getDueDate()).toString();
+        Billing billing = billingRepository.findByPropertyIdAndPeriod(propertyId, period)
+                .orElseGet(() -> createBillingForProperty(propertyId));
+
+        Tenant tenant = billing.getTenant();
+        byte[] pdf = generatePdf(billing);
+        String tenantName = tenant.getFirstName() + " " + tenant.getLastName();
+
+        try {
+            emailService.sendBillingEmailSync(tenant.getEmail(), tenantName, period, billing.getTotalAmount(), pdf);
+            return "OK: enviado a " + tenant.getEmail();
+        } catch (Exception e) {
+            return "ERROR: " + e.getClass().getName() + ": " + e.getMessage();
+        }
+    }
+
     @Transactional(readOnly = true)
     public byte[] getPdfFile(Long billingId) {
         Billing billing = billingRepository.findById(billingId).orElseThrow(() -> new IllegalArgumentException("Factura con ID " + billingId + " no encontrada"));
