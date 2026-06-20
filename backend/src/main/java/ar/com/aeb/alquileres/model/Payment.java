@@ -18,6 +18,10 @@ public class Payment extends BaseEntity {
     @JoinColumn(name = "property_id", nullable = false)
     private Property property;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tenant_id")
+    private Tenant tenant;
+
     @NotNull
     @Column(name = "payment_date", nullable = false)
     private LocalDate paymentDate;
@@ -44,6 +48,10 @@ public class Payment extends BaseEntity {
     @OneToMany(mappedBy = "payment", fetch = FetchType.EAGER)
     private List<Billing> billings = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "billing_id")
+    private Billing billing;
+
     public Payment() {
     }
 
@@ -53,6 +61,14 @@ public class Payment extends BaseEntity {
 
     public void setProperty(Property property) {
         this.property = property;
+    }
+
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
     }
 
     public LocalDate getPaymentDate() {
@@ -113,5 +129,13 @@ public class Payment extends BaseEntity {
 
     public enum PaymentMethod {
         BANK_TRANSFER, CASH, CHECK, DEBIT, CREDIT
+    }
+
+    public Billing getBilling() {
+        return billing;
+    }
+
+    public void setBilling(Billing billing) {
+        this.billing = billing;
     }
 }

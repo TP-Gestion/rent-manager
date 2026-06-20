@@ -8,10 +8,12 @@ import ar.com.aeb.alquileres.exception.rentalContract.RentalContractNotFoundExce
 import ar.com.aeb.alquileres.exception.rentalContract.DuplicateActiveContractException;
 import ar.com.aeb.alquileres.model.RentalContract;
 import ar.com.aeb.alquileres.model.Property;
+import ar.com.aeb.alquileres.model.Billing;
 import ar.com.aeb.alquileres.repository.RentalContractRepository;
 import ar.com.aeb.alquileres.repository.PropertyRepository;
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import ar.com.aeb.alquileres.repository.BillingRepository;
+import ar.com.aeb.alquileres.model.Tenant;
+import ar.com.aeb.alquileres.repository.TenantRepository;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,8 +37,14 @@ public class RentalContractService {
     @Autowired
     private FileStorageService fileStorageService;
 
+    @Autowired
+    private BillingRepository billingRepository;
+
     @org.springframework.beans.factory.annotation.Value("${upload.contracts.path:uploads/contracts}")
     private String uploadPath;
+
+    @Autowired
+    private TenantRepository tenantRepository;
 
     /**
      * Create a new rental contract
@@ -46,20 +54,28 @@ public class RentalContractService {
 
         // Validate that no rental contract already exists for this property
         List<RentalContract> existingContracts = rentalContractRepository.findByPropertyId(propertyId);
-        if (!existingContracts.isEmpty()) {
-            throw new DuplicateActiveContractException("Property with ID " + propertyId + " already has a rental contract.");
+
+        boolean hasActiveContract = existingContracts.stream().anyMatch(c -> c.getStatus() != RentalContract.RentalContractStatus.PAID);
+
+        if (hasActiveContract) {
+            throw new DuplicateActiveContractException("Property with ID " + propertyId + " already has an active rental contract.");
+        }
+
+
+        Tenant tenant = property.getTenant();
+        if (tenant == null) {
+            throw new IllegalStateException("Property has no tenant assigned");
         }
 
         RentalContract contract = new RentalContract(
                 property, request.getAmount(), request.getDueDate()
         );
+        contract.setTenant(tenant);
 
         MultipartFile file = request.getContract();
         if (file != null && !file.isEmpty()) {
             YearMonth now = YearMonth.now();
-            String fileName = fileStorageService.storeFile(uploadPath, file,
-                    String.valueOf(now.getYear()),
-                    String.format("%02d", now.getMonthValue()));
+            String fileName = fileStorageService.storeFile(uploadPath, file, String.valueOf(now.getYear()), String.format("%02d", now.getMonthValue()));
             contract.setContractPath(fileName);
         }
 
@@ -69,8 +85,7 @@ public class RentalContractService {
 
     @Transactional(readOnly = true)
     public Resource getContractResource(Long id) {
-        RentalContract contract = rentalContractRepository.findById(id)
-                .orElseThrow(() -> new RentalContractNotFoundException(id));
+        RentalContract contract = rentalContractRepository.findById(id).orElseThrow(() -> new RentalContractNotFoundException(id));
 
         if (contract.getContractPath() == null) {
             throw new RuntimeException("No contract file found for this record");
@@ -123,8 +138,24 @@ public class RentalContractService {
     public RentalContractResponse update(Long id, RentalContractRequest request) {
         RentalContract contract = rentalContractRepository.findById(id).orElseThrow(() -> new RentalContractNotFoundException(id));
 
-        contract.setAmount(request.getAmount());
-        contract.setDueDate(request.getDueDate());
+        if (request.getAmount() != null) {
+            contract.setAmount(request.getAmount());
+        }
+        if (request.getDueDate() != null) {
+            contract.setDueDate(request.getDueDate());
+        }
+
+        MultipartFile file = request.getContract();
+        if (file != null && !file.isEmpty()) {
+            // Delete old file if exists
+            if (contract.getContractPath() != null) {
+                fileStorageService.deleteFile(uploadPath, contract.getContractPath());
+            }
+
+            YearMonth now = YearMonth.now();
+            String fileName = fileStorageService.storeFile(uploadPath, file, String.valueOf(now.getYear()), String.format("%02d", now.getMonthValue()));
+            contract.setContractPath(fileName);
+        }
 
         RentalContract updated = rentalContractRepository.save(contract);
         return new RentalContractResponse(updated);
@@ -135,6 +166,16 @@ public class RentalContractService {
      */
     public void delete(Long id) {
         RentalContract contract = rentalContractRepository.findById(id).orElseThrow(() -> new RentalContractNotFoundException(id));
+
+        // Delete related billings
+        List<Billing> billings = billingRepository.findByRentalContractId(id);
+        billingRepository.deleteAll(billings);
+
+        // Delete file if exists
+        if (contract.getContractPath() != null) {
+            fileStorageService.deleteFile(uploadPath, contract.getContractPath());
+        }
+
         rentalContractRepository.delete(contract);
     }
 

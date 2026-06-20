@@ -1,6 +1,6 @@
 # Alquileres
 
-Proyecto de gestión de propiedades en alquiler, desarrollado en Java con Spring Boot y PostgreSQL.
+Proyecto de gestión de propiedades en alquiler, desarrollado en Java con Spring Boot y PostgreSQL. Gestion de Sistemas Informaticos - UBA
 
 ## 🚀 Puesta en marcha
 

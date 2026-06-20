@@ -36,38 +36,31 @@ public class PaymentController {
 
     @PostMapping(value = "/payments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<PaymentResponse>> registerPayment(
-            @PathVariable Long propertyId,
-            @Valid @ModelAttribute PaymentRequest request) {
+                                                                        @PathVariable Long propertyId, @Valid @ModelAttribute PaymentRequest request) {
         PaymentResponse response = paymentService.registerPayment(propertyId, request, request.getReceipt());
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(201, "Payment registered successfully", response));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(201, "Payment registered successfully", response));
     }
 
     @GetMapping("/payments/{paymentId}/receipt")
     public ResponseEntity<Resource> getReceipt(@PathVariable Long propertyId, @PathVariable Long paymentId) {
         Resource resource = paymentService.getReceipt(paymentId);
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_PDF)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
-                .body(resource);
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"").body(resource);
     }
 
     @GetMapping("/payments")
     public ResponseEntity<ApiResponse<List<PaymentResponse>>> getPaymentsByProperty(
-            @PathVariable Long propertyId) {
+                                                                                    @PathVariable Long propertyId) {
         List<PaymentResponse> payments = paymentService.getPaymentsByProperty(propertyId);
         return ResponseEntity.ok(ApiResponse.success("Success", payments));
     }
 
     @GetMapping("/billings")
     public ResponseEntity<ApiResponse<List<BillingResponse>>> getBillingsByProperty(
-            @PathVariable Long propertyId) {
+                                                                                    @PathVariable Long propertyId) {
         if (!propertyRepository.existsById(propertyId)) {
             throw new PropertyNotFoundException(propertyId);
         }
-        List<BillingResponse> billings = billingRepository.findByPropertyId(propertyId).stream()
-                .map(BillingResponse::new)
-                .toList();
+        List<BillingResponse> billings = billingRepository.findByPropertyId(propertyId).stream().map(BillingResponse::new).toList();
         return ResponseEntity.ok(ApiResponse.success("Success", billings));
     }
 }

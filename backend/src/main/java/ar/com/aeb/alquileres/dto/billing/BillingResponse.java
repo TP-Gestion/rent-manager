@@ -1,6 +1,7 @@
 package ar.com.aeb.alquileres.dto.billing;
 
 import ar.com.aeb.alquileres.model.Billing;
+import ar.com.aeb.alquileres.model.Tenant;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -13,6 +14,7 @@ public class BillingResponse {
     private BigDecimal amount;
     private LocalDate dueDate;
     private LocalDate paymentDate;
+    private TenantInfo tenant;
 
     public BillingResponse() {
     }
@@ -23,9 +25,42 @@ public class BillingResponse {
         this.status = billing.getStatus().name();
         this.amount = billing.getTotalAmount();
         this.dueDate = billing.getDueDate();
-        this.paymentDate = billing.getPayment() != null
-                ? billing.getPayment().getPaymentDate()
-                : null;
+        this.paymentDate = billing.getPayment() != null ? billing.getPayment().getPaymentDate() : null;
+        // Historical tenant snapshot: the tenant that was billed, independent of the
+        // current Property-Tenant relation. Null for billings created before this feature.
+        this.tenant = billing.getTenant() != null ? new TenantInfo(billing.getTenant()) : null;
+    }
+
+    /**
+     * Minimal historical view of the tenant that was billed.
+     */
+    public static class TenantInfo {
+        private String firstName;
+        private String lastName;
+
+        public TenantInfo() {
+        }
+
+        public TenantInfo(Tenant tenant) {
+            this.firstName = tenant.getFirstName();
+            this.lastName = tenant.getLastName();
+        }
+
+        public String getFirstName() {
+            return firstName;
+        }
+
+        public void setFirstName(String firstName) {
+            this.firstName = firstName;
+        }
+
+        public String getLastName() {
+            return lastName;
+        }
+
+        public void setLastName(String lastName) {
+            this.lastName = lastName;
+        }
     }
 
     public Long getId() {
@@ -74,5 +109,13 @@ public class BillingResponse {
 
     public void setPaymentDate(LocalDate paymentDate) {
         this.paymentDate = paymentDate;
+    }
+
+    public TenantInfo getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(TenantInfo tenant) {
+        this.tenant = tenant;
     }
 }

@@ -1,8 +1,10 @@
 package ar.com.aeb.alquileres.controller;
 
 import ar.com.aeb.alquileres.dto.ApiResponse;
+import ar.com.aeb.alquileres.dto.building.BuildingResponse;
 import ar.com.aeb.alquileres.dto.tenant.TenantRequest;
 import ar.com.aeb.alquileres.dto.tenant.TenantResponse;
+import ar.com.aeb.alquileres.dto.tenant.TenantSummaryResponse;
 import ar.com.aeb.alquileres.service.TenantService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -33,8 +36,8 @@ public class TenantController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<TenantResponse>>> getAllTenants() {
-        List<TenantResponse> tenants = tenantService.getAll();
+    public ResponseEntity<ApiResponse<List<TenantResponse>>> getAllTenants(@RequestParam(defaultValue = "false") boolean includeInactive) {
+        List<TenantResponse> tenants = tenantService.getAll(includeInactive);
         return ResponseEntity.ok(ApiResponse.success("Success", tenants));
     }
 
@@ -42,6 +45,18 @@ public class TenantController {
     public ResponseEntity<ApiResponse<TenantResponse>> getTenantDetail(@PathVariable Long id) {
         TenantResponse tenant = tenantService.getDetail(id);
         return ResponseEntity.ok(ApiResponse.success("Success", tenant));
+    }
+
+    @GetMapping("/{id}/buildings")
+    public ResponseEntity<ApiResponse<List<BuildingResponse>>> getTenantBuildings(@PathVariable Long id) {
+        List<BuildingResponse> buildings = tenantService.getBuildings(id);
+        return ResponseEntity.ok(ApiResponse.success("Success", buildings));
+    }
+
+    @GetMapping("/{id}/summary")
+    public ResponseEntity<ApiResponse<TenantSummaryResponse>> getTenantSummary(@PathVariable Long id) {
+        TenantSummaryResponse summary = tenantService.getSummary(id);
+        return ResponseEntity.ok(ApiResponse.success("Success", summary));
     }
 
     @PutMapping("/{id}")

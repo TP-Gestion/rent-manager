@@ -49,6 +49,10 @@ public class Billing extends BaseEntity {
     @JoinColumn(name = "payment_id")
     private Payment payment;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tenant_id")
+    private Tenant tenant;
+
     public Billing() {
     }
 
@@ -146,6 +150,14 @@ public class Billing extends BaseEntity {
 
     public void setPayment(Payment payment) {
         this.payment = payment;
+    }
+
+    public Tenant getTenant() {
+        return tenant;
+    }
+
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
     }
 
     public enum BillingStatus {
